@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="4dp"
+    android:layout_margin="8dp"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/ci_friend_list"
+        android:layout_gravity="center_vertical"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        tools:src="@drawable/ic_photo_library"
+        app:border_overlay="false"
+        app:border_width="2dp"
+        app:border_color="#CFD8DC"/>
+
+    <TextView
+        android:id="@+id/tv_name_friend_list"
+        android:layout_weight="2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:textSize="18sp"
+        tools:text="Alfian Dhimas Nur Marita"/>
+
+    <Button
+        android:id="@+id/btn_meet_friend"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/colorAccent"
+        android:textColor="@android:color/white"
+        android:textStyle="bold"
+        android:text="meet Me"/>
+
+</LinearLayout>

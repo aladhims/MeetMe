@@ -1,0 +1,70 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <fragment
+        xmlns:map="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        tools:context="win.aladhims.meetme.DirectMeActivity" />
+
+    <RelativeLayout
+        android:layout_weight="1"
+        android:layout_width="match_parent"
+        android:layout_height="0dp">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rv_chat"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/garis_pembatas"/>
+        <View
+            android:id="@+id/garis_pembatas"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_above="@+id/layout_enter_chat"
+            android:background="@color/colorUntukGaris"/>
+
+        <LinearLayout
+            android:id="@+id/layout_enter_chat"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentStart="true"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/iv_chat_pick_photo"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_photo_library"/>
+
+            <EditText
+                android:id="@+id/et_chat_message"
+                android:layout_gravity="bottom"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:hint="Masukkan Pesan"
+                android:background="@android:color/transparent"/>
+
+            <Button
+                android:id="@+id/btn_chat_send"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_gravity="bottom"
+                android:background="@drawable/ic_send"
+                />
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</LinearLayout>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="win.aladhims.meetme.ListFriendActivity">
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rv_friend_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:listitem="@layout/friend_item"/>
+
+    <ProgressBar
+        android:id="@+id/pg_friend_list"
+        android:layout_gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="?android:attr/progressBarStyleLarge" />
+
+</FrameLayout>
