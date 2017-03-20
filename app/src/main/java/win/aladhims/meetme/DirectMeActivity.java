@@ -7,8 +7,16 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.view.Gravity;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
@@ -37,7 +45,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import pub.devrel.easypermissions.EasyPermissions;
+import win.aladhims.meetme.Model.Chat;
+import win.aladhims.meetme.Model.User;
+import win.aladhims.meetme.ViewHolder.ChatViewHolder;
 
 public class DirectMeActivity extends FragmentActivity
         implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
@@ -45,9 +58,18 @@ public class DirectMeActivity extends FragmentActivity
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest request;
-    private DatabaseReference meetRef;
+    private DatabaseReference rootRef,meetRef,chatRef;
     private final static String TAG = DirectMeActivity.class.getSimpleName();
     String[] perms = new String[]{Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.INTERNET};
+
+    private FirebaseRecyclerAdapter<Chat,ChatViewHolder> mChatAdapter;
+
+    @BindView(R.id.btn_chat_send)
+    Button mBtnSendChat;
+    @BindView(R.id.et_chat_message)
+    EditText mEtChatMessage;
+    @BindView(R.id.rv_chat)
+    RecyclerView mChatRecyclerView;
 
     private Polyline mCurPolyLine;
     private MarkerOptions myMarkerOptions,friendMarkerOptions;
@@ -64,16 +86,14 @@ public class DirectMeActivity extends FragmentActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_direct_me);
 
+        ButterKnife.bind(this);
+
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
                 .build();
         createLocationReq();
-
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
 
         Intent i = getIntent();
         friendID = i.getStringExtra(ListFriendActivity.FRIENDUID);
@@ -83,7 +103,63 @@ public class DirectMeActivity extends FragmentActivity
         builder.addLocationRequest(request);
 
         myUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        meetRef = FirebaseDatabase.getInstance().getReference().child("meet").child(meetID);
+        rootRef = FirebaseDatabase.getInstance().getReference();
+        meetRef = rootRef.child("meet").child(meetID);
+        chatRef = meetRef.child("chat");
+
+        LinearLayoutManager lm = new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false);
+        lm.setStackFromEnd(true);
+        mChatRecyclerView.setLayoutManager(lm);
+
+        mChatAdapter = new FirebaseRecyclerAdapter<Chat, ChatViewHolder>(Chat.class,R.layout.chat_item,ChatViewHolder.class,chatRef) {
+            @Override
+            protected void populateViewHolder(final ChatViewHolder viewHolder, final Chat model, int position) {
+                if(model.getFromUid().equals(myUid)){
+                    viewHolder.mTvSenderName.setVisibility(View.GONE);
+                    viewHolder.mCiPhotoUserChat.setVisibility(View.GONE);
+                    viewHolder.mMessageBody.setGravity(Gravity.END);
+                    viewHolder.mTvMessage.setText(model.getPesan());
+                }else{
+                    rootRef.child("users").child(model.getFromUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            User user = dataSnapshot.getValue(User.class);
+                            Glide.with(getApplicationContext())
+                                    .load(user.getPhotoURL())
+                                    .into(viewHolder.mCiPhotoUserChat);
+
+                            viewHolder.mTvSenderName.setText(user.getName());
+
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+                    viewHolder.mTvMessage.setText(model.getPesan());
+                }
+            }
+        };
+
+        mChatRecyclerView.setAdapter(mChatAdapter);
+
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+
+
+
+        mBtnSendChat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                String chatKey = chatRef.push().getKey();
+                Chat chat = new Chat(myUid,friendID,mEtChatMessage.getText().toString());
+                chatRef.child(chatKey).setValue(chat);
+                mEtChatMessage.setText("");
+            }
+        });
 
     }
 
@@ -105,11 +181,13 @@ public class DirectMeActivity extends FragmentActivity
     private void startLocationUpdate(){
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient,request,this);
         lastLoc = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        Map<String, Object> upFirstLoc = new HashMap<>();
-        upFirstLoc.put("LAT",lastLoc.getLatitude());
-        upFirstLoc.put("LONG",lastLoc.getLongitude());
+        if(lastLoc != null) {
+            Map<String, Object> upFirstLoc = new HashMap<>();
+            upFirstLoc.put("LAT", lastLoc.getLatitude());
+            upFirstLoc.put("LONG", lastLoc.getLongitude());
 
-        meetRef.child(myUid).updateChildren(upFirstLoc);
+            meetRef.child(myUid).updateChildren(upFirstLoc);
+        }
 
     }
 
