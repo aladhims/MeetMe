@@ -22,20 +22,26 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import win.aladhims.meetme.Model.User;
 import win.aladhims.meetme.ViewHolder.FriendViewHolder;
 
-public class ListFriendActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
+public class ListFriendActivity extends BaseActivity implements GoogleApiClient.OnConnectionFailedListener {
 
     //final fields
     private static final String TAG = ListFriendActivity.class.getSimpleName();
+    public static final String MYUIDEXTRAINTENT = "MYUID";
     public static final String FRIENDUID = "FRIENDUID";
     public static final String MEETID = "MEETID";
 
@@ -87,11 +93,36 @@ public class ListFriendActivity extends AppCompatActivity implements GoogleApiCl
                 holder.mBtnMeetFriend.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        showProgressDialog();
                         final String meetActId = "1";
-                        Intent i = new Intent(getApplicationContext(),DirectMeActivity.class);
-                        i.putExtra(MEETID,meetActId);
-                        i.putExtra(FRIENDUID,uid);
-                        startActivity(i);
+
+                        Map<String, Object> collect = new HashMap<>();
+                        collect.put("inviter", mUser.getUid());
+                        collect.put("meetID",meetActId);
+                        collect.put("agree",false);
+                        Map<String, Object> up = new HashMap<>();
+                        up.put("/invite/" + uid,collect);
+                        rootRef.updateChildren(up);
+
+                        rootRef.child("invite").child(uid).addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                hideProgressDialog();
+                                boolean b = (Boolean) dataSnapshot.child("agree").getValue();
+                                if(b){
+                                    Intent i = new Intent(getApplicationContext(),DirectMeActivity.class);
+                                    i.putExtra(MEETID,meetActId);
+                                    i.putExtra(FRIENDUID,uid);
+                                    startActivity(i);
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+
 
                     }
                 });
@@ -103,6 +134,10 @@ public class ListFriendActivity extends AppCompatActivity implements GoogleApiCl
         DividerItemDecoration itemDecoration = new DividerItemDecoration(this,DividerItemDecoration.VERTICAL);
         mRecyclerView.addItemDecoration(itemDecoration);
         mRecyclerView.setAdapter(mAdapter);
+
+        Intent i = new Intent(this,NotifyMeService.class);
+        i.putExtra(MYUIDEXTRAINTENT,mUser.getUid());
+        startService(i);
     }
 
 

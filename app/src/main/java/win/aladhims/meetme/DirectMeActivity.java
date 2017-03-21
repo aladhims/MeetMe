@@ -85,6 +85,8 @@ public class DirectMeActivity extends FragmentActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_direct_me);
+        rootRef = FirebaseDatabase.getInstance().getReference();
+        myUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         ButterKnife.bind(this);
 
@@ -96,14 +98,21 @@ public class DirectMeActivity extends FragmentActivity
         createLocationReq();
 
         Intent i = getIntent();
+
         friendID = i.getStringExtra(ListFriendActivity.FRIENDUID);
         meetID = i.getStringExtra(ListFriendActivity.MEETID);
+        if(i.hasExtra(NotifyMeService.AGREEEXTRA)){
+            Map<String, Object> map = new HashMap<>();
+            map.put("/invite/"+ myUid + "/agree/",true);
+
+            rootRef.updateChildren(map);
+        }
 
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
         builder.addLocationRequest(request);
 
-        myUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        rootRef = FirebaseDatabase.getInstance().getReference();
+
+
         meetRef = rootRef.child("meet").child(meetID);
         chatRef = meetRef.child("chat");
 
