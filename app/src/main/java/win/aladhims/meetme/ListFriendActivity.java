@@ -1,6 +1,7 @@
 package win.aladhims.meetme;
 
 import android.content.Intent;
+import android.os.CountDownTimer;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -12,6 +13,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
@@ -80,7 +82,7 @@ public class ListFriendActivity extends BaseActivity implements GoogleApiClient.
 
         mAdapter = new FirebaseRecyclerAdapter<User, FriendViewHolder>(User.class,R.layout.friend_item,FriendViewHolder.class,friendListRef) {
             @Override
-            protected void populateViewHolder(FriendViewHolder holder, User user, int position) {
+            protected void populateViewHolder(FriendViewHolder holder, final User user, int position) {
                 mProgressBar.setVisibility(View.GONE);
                 final String uid = getRef(position).getKey();
                 if(uid.equals(mUser.getUid())){
@@ -94,28 +96,40 @@ public class ListFriendActivity extends BaseActivity implements GoogleApiClient.
                     @Override
                     public void onClick(View v) {
                         showProgressDialog();
-                        final String meetActId = "1";
 
+                        final String meetActId = rootRef.push().getKey();
+                        Map<String, Object> collect = new HashMap<>();
+                        collect.put("inviter", mUser.getUid());
+                        collect.put("meetID", meetActId);
+                        collect.put("agree", false);
+                        Map<String, Object> up = new HashMap<>();
+                        up.put("/invite/" + uid, collect);
+                        rootRef.updateChildren(up);
+                        final CountDownTimer timer = new CountDownTimer(30000,1000) {
+                            @Override
+                            public void onTick(long millisUntilFinished) {}
+
+                            @Override
+                            public void onFinish() {
+                                hideProgressDialog();
+                                rootRef.child("invite").child(uid).removeValue();
+                                Toast.makeText(getApplicationContext(),user.getName() + " tidak merespon",Toast.LENGTH_LONG).show();
+                            }
+                        };
+                        timer.start();
                         rootRef.child("invite").child(uid).addValueEventListener(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
-                                hideProgressDialog();
-                                if(dataSnapshot != null) {
+                                if(dataSnapshot.getValue() != null) {
                                     boolean b = (Boolean) dataSnapshot.child("agree").getValue();
                                     if (b) {
+                                        hideProgressDialog();
                                         Intent i = new Intent(getApplicationContext(), DirectMeActivity.class);
                                         i.putExtra(MEETID, meetActId);
                                         i.putExtra(FRIENDUID, uid);
                                         startActivity(i);
+                                        timer.cancel();
                                     }
-                                }else {
-                                    Map<String, Object> collect = new HashMap<>();
-                                    collect.put("inviter", mUser.getUid());
-                                    collect.put("meetID", meetActId);
-                                    collect.put("agree", false);
-                                    Map<String, Object> up = new HashMap<>();
-                                    up.put("/invite/" + uid, collect);
-                                    rootRef.updateChildren(up);
                                 }
 
                             }
@@ -125,8 +139,6 @@ public class ListFriendActivity extends BaseActivity implements GoogleApiClient.
 
                             }
                         });
-
-
                     }
                 });
             }

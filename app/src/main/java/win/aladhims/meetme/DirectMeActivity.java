@@ -34,6 +34,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Cap;
 import com.google.android.gms.maps.model.CustomCap;
+import com.google.android.gms.maps.model.IndoorBuilding;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
@@ -239,9 +240,6 @@ public class DirectMeActivity extends FragmentActivity
             Log.e(TAG,"error parsing raw");
         }
         mMap.setIndoorEnabled(true);
-        if(EasyPermissions.hasPermissions(this,perms)){
-            mMap.setMyLocationEnabled(true);
-        }
         myMarkerOptions = new MarkerOptions();
         myMarkerOptions.draggable(false);
         friendMarkerOptions = new MarkerOptions();
@@ -251,19 +249,18 @@ public class DirectMeActivity extends FragmentActivity
         if(lastLoc != null){
             myMarkerOptions.position(new LatLng(lastLoc.getLatitude(),lastLoc.getLongitude()));
         }
-
-
-
         myMarker = mMap.addMarker(myMarkerOptions);
         friendMarker = mMap.addMarker(friendMarkerOptions);
 
         meetRef.child(friendID).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                double Lat = (Double) dataSnapshot.child("LAT").getValue();
-                double Long = (Double) dataSnapshot.child("LONG").getValue();
-                friendLoc = new LatLng(Lat,Long);
-                friendMarker.setPosition(new LatLng(Lat,Long));
+                if(dataSnapshot.getValue() != null) {
+                    double Lat = (Double) dataSnapshot.child("LAT").getValue();
+                    double Long = (Double) dataSnapshot.child("LONG").getValue();
+                    friendLoc = new LatLng(Lat, Long);
+                    friendMarker.setPosition(new LatLng(Lat, Long));
+                }
             }
 
             @Override
@@ -298,8 +295,6 @@ public class DirectMeActivity extends FragmentActivity
         locChange.put("LONG",location.getLongitude());
 
         meetRef.child(myUid).updateChildren(locChange);
-        Toast.makeText(this, location.toString(), Toast.LENGTH_SHORT).show();
-
         LatLng newLoc = new LatLng(location.getLatitude(),location.getLongitude());
         myMarker.setPosition(newLoc);
         if(friendLoc != null) {
