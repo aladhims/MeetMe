@@ -96,25 +96,28 @@ public class ListFriendActivity extends BaseActivity implements GoogleApiClient.
                         showProgressDialog();
                         final String meetActId = "1";
 
-                        Map<String, Object> collect = new HashMap<>();
-                        collect.put("inviter", mUser.getUid());
-                        collect.put("meetID",meetActId);
-                        collect.put("agree",false);
-                        Map<String, Object> up = new HashMap<>();
-                        up.put("/invite/" + uid,collect);
-                        rootRef.updateChildren(up);
-
                         rootRef.child("invite").child(uid).addValueEventListener(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
                                 hideProgressDialog();
-                                boolean b = (Boolean) dataSnapshot.child("agree").getValue();
-                                if(b){
-                                    Intent i = new Intent(getApplicationContext(),DirectMeActivity.class);
-                                    i.putExtra(MEETID,meetActId);
-                                    i.putExtra(FRIENDUID,uid);
-                                    startActivity(i);
+                                if(dataSnapshot != null) {
+                                    boolean b = (Boolean) dataSnapshot.child("agree").getValue();
+                                    if (b) {
+                                        Intent i = new Intent(getApplicationContext(), DirectMeActivity.class);
+                                        i.putExtra(MEETID, meetActId);
+                                        i.putExtra(FRIENDUID, uid);
+                                        startActivity(i);
+                                    }
+                                }else {
+                                    Map<String, Object> collect = new HashMap<>();
+                                    collect.put("inviter", mUser.getUid());
+                                    collect.put("meetID", meetActId);
+                                    collect.put("agree", false);
+                                    Map<String, Object> up = new HashMap<>();
+                                    up.put("/invite/" + uid, collect);
+                                    rootRef.updateChildren(up);
                                 }
+
                             }
 
                             @Override

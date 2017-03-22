@@ -36,7 +36,7 @@
 
         <activity
             android:name=".DirectMeActivity"
-            android:label="@string/title_activity_direct_me"></activity>
+            android:label="@string/title_activity_direct_me"/>
         <activity android:name=".SignInActivity">
         </activity>
         <activity android:name=".ListFriendActivity">
@@ -49,6 +49,8 @@
 
         <service android:name=".NotifyMeService"
             android:exported="false"/>
+
+        <receiver android:name=".ButtonReceiverNotif"/>
     </application>
 
 </manifest>

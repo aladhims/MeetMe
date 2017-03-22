@@ -1,14 +1,18 @@
 package win.aladhims.meetme;
 
 import android.Manifest;
+import android.app.NotificationManager;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
@@ -27,8 +31,12 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.Cap;
+import com.google.android.gms.maps.model.CustomCap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
@@ -98,12 +106,13 @@ public class DirectMeActivity extends FragmentActivity
         createLocationReq();
 
         Intent i = getIntent();
-
         friendID = i.getStringExtra(ListFriendActivity.FRIENDUID);
         meetID = i.getStringExtra(ListFriendActivity.MEETID);
         if(i.hasExtra(NotifyMeService.AGREEEXTRA)){
             Map<String, Object> map = new HashMap<>();
             map.put("/invite/"+ myUid + "/agree/",true);
+            NotificationManager manager = (NotificationManager) this.getSystemService(NOTIFICATION_SERVICE);
+            manager.cancel(NotifyMeService.NOTIFYID);
 
             rootRef.updateChildren(map);
         }
@@ -224,7 +233,15 @@ public class DirectMeActivity extends FragmentActivity
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        try {
+            mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this,R.raw.mapraw));
+        }catch (Resources.NotFoundException e){
+            Log.e(TAG,"error parsing raw");
+        }
         mMap.setIndoorEnabled(true);
+        if(EasyPermissions.hasPermissions(this,perms)){
+            mMap.setMyLocationEnabled(true);
+        }
         myMarkerOptions = new MarkerOptions();
         myMarkerOptions.draggable(false);
         friendMarkerOptions = new MarkerOptions();
@@ -294,6 +311,7 @@ public class DirectMeActivity extends FragmentActivity
                         if (mCurPolyLine.getPoints().size() != 0) {
                             mCurPolyLine.remove();
                         }
+                        mCurPolyLine.setGeodesic(true);
                     }
                     ArrayList<LatLng> locForPoly = Utility.decodePoly(Utility.getStringPolyline(string));
                     PolylineOptions options = new PolylineOptions();

@@ -41,55 +41,48 @@ public class NotifyMeService extends IntentService {
 
     @Override
     protected void onHandleIntent(@Nullable final Intent intent) {
-        rootRef = FirebaseDatabase.getInstance().getReference();
-        context = getApplicationContext();
-        userUID = intent.getStringExtra(ListFriendActivity.MYUIDEXTRAINTENT);
-        checkRef = rootRef.child("invite").child(userUID);
-        checkRef.addChildEventListener(new ChildEventListener() {
+        new Thread(new Runnable() {
             @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                //TODO ADA BUG DI FRIEND ID SM MEETID nilainya doi null, salah di pathnya mungkin
-                friendID = "Gbg4SOOPnuOY39sLXlPf9drGgMr2";
-                if(friendID == null){
-                    Log.d("SERVICE","friendid is " + friendID);
-                }
-                meetID = (String) dataSnapshot.child("meetID").getValue();
-                rootRef.child("users").child(friendID).addListenerForSingleValueEvent(new ValueEventListener() {
+            public void run() {
+                rootRef = FirebaseDatabase.getInstance().getReference();
+                context = getApplicationContext();
+                userUID = intent.getStringExtra(ListFriendActivity.MYUIDEXTRAINTENT);
+                checkRef = rootRef.child("invite").child(userUID);
+                checkRef.addChildEventListener(new ChildEventListener() {
                     @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        User user = dataSnapshot.getValue(User.class);
-                        friendName = user.getName();
+                    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                        //TODO ADA BUG DI FRIEND ID SM MEETID nilainya doi null, salah di pathnya mungkin
+                        friendID = "Gbg4SOOPnuOY39sLXlPf9drGgMr2";
+                        if(friendID == null){
+                            Log.d("SERVICE","friendid is " + friendID);
+                        }
+                        meetID = (String) dataSnapshot.child("meetID").getValue();
+                        rootRef.child("users").child(friendID).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                User user = dataSnapshot.getValue(User.class);
+                                friendName = user.getName();
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+                        NotifyMe(friendName, friendID, "1");
                     }
 
                     @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
+                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {}
+                    @Override
+                    public void onChildRemoved(DataSnapshot dataSnapshot) {}
+                    @Override
+                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {}
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {}
                 });
-
-                NotifyMe(friendName, friendID, "1");
             }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+        }).run();
     }
 
     private void NotifyMe(String inviterName, String inviterId,String meetID){
@@ -103,17 +96,21 @@ public class NotifyMeService extends IntentService {
                 .setSmallIcon(R.drawable.ic_photo_library)
                 .setLargeIcon(bitmap);
 
-        Intent intent = new Intent(getApplicationContext(),DirectMeActivity.class);
-        intent.putExtra(AGREEEXTRA,true);
-        intent.putExtra(ListFriendActivity.FRIENDUID,inviterId)
+        Intent yesIntent = new Intent(context,DirectMeActivity.class);
+        yesIntent.putExtra(AGREEEXTRA,true);
+        yesIntent.putExtra(ListFriendActivity.FRIENDUID,inviterId)
                 .putExtra(ListFriendActivity.MEETID,meetID);
 
-        TaskStackBuilder taskStackBuilder = TaskStackBuilder.create(context);
-        taskStackBuilder.addNextIntent(intent);
-        PendingIntent pendingIntent = taskStackBuilder.getPendingIntent(0,PendingIntent.FLAG_UPDATE_CURRENT);
+        Intent NoIntent = new Intent(context,ButtonReceiverNotif.class);
+        NoIntent.putExtra("notificationID",NOTIFYID);
 
-        NotificationCompat.Action actionYes = new NotificationCompat.Action(R.drawable.ic_send,"Okey!",pendingIntent);
+        PendingIntent yesPendingIntent = PendingIntent.getActivity(context,0,yesIntent,PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent dismissPendingIntent = PendingIntent.getBroadcast(context,1,NoIntent,PendingIntent.FLAG_UPDATE_CURRENT);
+
+        NotificationCompat.Action actionYes = new NotificationCompat.Action(R.drawable.ic_send,"Okey!",yesPendingIntent);
+        NotificationCompat.Action actionNo = new NotificationCompat.Action(R.drawable.ic_photo_library,"Nggak!",dismissPendingIntent);
         builder.addAction(actionYes);
+        builder.addAction(actionNo);
         builder.setPriority(Notification.PRIORITY_HIGH);
 
         NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
