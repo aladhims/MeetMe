@@ -1,4 +1,4 @@
-package win.aladhims.meetme;
+package win.aladhims.meetme.Utility;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -10,13 +10,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.Polyline;
-import com.google.android.gms.maps.model.PolylineOptions;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -28,7 +22,7 @@ import java.util.ArrayList;
  * Created by Aladhims on 18/03/2017.
  */
 
-public class Utility {
+public class PolylineUtils {
 
     public static String Response;
 

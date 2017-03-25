@@ -9,14 +9,17 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
-import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -31,10 +34,6 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.Cap;
-import com.google.android.gms.maps.model.CustomCap;
-import com.google.android.gms.maps.model.IndoorBuilding;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
@@ -43,12 +42,13 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,12 +56,14 @@ import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import de.hdodenhof.circleimageview.CircleImageView;
 import pub.devrel.easypermissions.EasyPermissions;
 import win.aladhims.meetme.Model.Chat;
 import win.aladhims.meetme.Model.User;
+import win.aladhims.meetme.Utility.PolylineUtils;
 import win.aladhims.meetme.ViewHolder.ChatViewHolder;
 
-public class DirectMeActivity extends FragmentActivity
+public class DirectMeActivity extends BaseActivity
         implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
     private GoogleMap mMap;
@@ -106,6 +108,7 @@ public class DirectMeActivity extends FragmentActivity
                 .build();
         createLocationReq();
 
+        //get intent's data
         Intent i = getIntent();
         friendID = i.getStringExtra(ListFriendActivity.FRIENDUID);
         meetID = i.getStringExtra(ListFriendActivity.MEETID);
@@ -121,8 +124,6 @@ public class DirectMeActivity extends FragmentActivity
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
         builder.addLocationRequest(request);
 
-
-
         meetRef = rootRef.child("meet").child(meetID);
         chatRef = meetRef.child("chat");
 
@@ -130,6 +131,31 @@ public class DirectMeActivity extends FragmentActivity
         lm.setStackFromEnd(true);
         mChatRecyclerView.setLayoutManager(lm);
 
+        Toolbar directToolbar = (Toolbar) findViewById(R.id.meet_toolbar);
+        setSupportActionBar(directToolbar);
+        final CircleImageView ciTeman = (CircleImageView) findViewById(R.id.ci_toolbar_meet);
+        final TextView tvTeman = (TextView) findViewById(R.id.tv_toolbar_meet);
+
+        rootRef.child("users").child(friendID).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.getValue()!= null){
+                    User friend = dataSnapshot.getValue(User.class);
+                    Glide.with(getApplicationContext())
+                            .load(friend.getPhotoURL())
+                            .into(ciTeman);
+
+                    tvTeman.setText(friend.getName());
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        //the adapter for the chat between them
         mChatAdapter = new FirebaseRecyclerAdapter<Chat, ChatViewHolder>(Chat.class,R.layout.chat_item,ChatViewHolder.class,chatRef) {
             @Override
             protected void populateViewHolder(final ChatViewHolder viewHolder, final Chat model, int position) {
@@ -180,6 +206,25 @@ public class DirectMeActivity extends FragmentActivity
             }
         });
 
+        meetRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.getValue() == null){
+                    closeDirect();
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+
+    private void closeDirect(){
+        startActivity(new Intent(this,ListFriendActivity.class));
+        finish();
     }
 
     protected void requestPerms(){
@@ -234,6 +279,7 @@ public class DirectMeActivity extends FragmentActivity
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        //make a new cool style for the map
         try {
             mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this,R.raw.mapraw));
         }catch (Resources.NotFoundException e){
@@ -252,6 +298,9 @@ public class DirectMeActivity extends FragmentActivity
         myMarker = mMap.addMarker(myMarkerOptions);
         friendMarker = mMap.addMarker(friendMarkerOptions);
 
+        /*listen for location change on the other side (friend location) and
+        assign it to friendLoc variable and move friend marker to the new location
+         */
         meetRef.child(friendID).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -289,7 +338,7 @@ public class DirectMeActivity extends FragmentActivity
 
     @Override
     public void onLocationChanged(Location location) {
-
+        //Every location change make a new request to Google Direction for new Polyline direction
         Map<String, Object> locChange = new HashMap<>();
         locChange.put("LAT",location.getLatitude());
         locChange.put("LONG",location.getLongitude());
@@ -297,9 +346,10 @@ public class DirectMeActivity extends FragmentActivity
         meetRef.child(myUid).updateChildren(locChange);
         LatLng newLoc = new LatLng(location.getLatitude(),location.getLongitude());
         myMarker.setPosition(newLoc);
+        //and also we check for friend location every our location change if the friend location if also change or not null
         if(friendLoc != null) {
-            String newReq = Utility.requestJSONDirection(newLoc,friendLoc);
-            Utility.getResponse(this, newReq, new Utility.VolleyCallback() {
+            String newReq = PolylineUtils.requestJSONDirection(newLoc,friendLoc);
+            PolylineUtils.getResponse(this, newReq, new PolylineUtils.VolleyCallback() {
                 @Override
                 public void onSuccess(String string) {
                     if (mCurPolyLine != null) {
@@ -308,7 +358,7 @@ public class DirectMeActivity extends FragmentActivity
                         }
                         mCurPolyLine.setGeodesic(true);
                     }
-                    ArrayList<LatLng> locForPoly = Utility.decodePoly(Utility.getStringPolyline(string));
+                    ArrayList<LatLng> locForPoly = PolylineUtils.decodePoly(PolylineUtils.getStringPolyline(string));
                     PolylineOptions options = new PolylineOptions();
                     options.addAll(locForPoly);
                     mCurPolyLine = mMap.addPolyline(options);
@@ -325,6 +375,24 @@ public class DirectMeActivity extends FragmentActivity
 
                 }
             });
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.direct_menu,menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.end_direct:
+                meetRef.removeValue();
+                closeDirect();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 }

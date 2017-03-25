@@ -36,7 +36,8 @@
 
         <activity
             android:name=".DirectMeActivity"
-            android:label="@string/title_activity_direct_me"/>
+            android:label="@string/title_activity_direct_me"
+            android:theme="@style/NoBarTheme"/>
         <activity android:name=".SignInActivity">
         </activity>
         <activity android:name=".ListFriendActivity">

@@ -15,8 +15,6 @@ public class ButtonReceiverNotif extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
 
         int notificationID = intent.getIntExtra("notificationID",0);
-
-
         NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         manager.cancel(notificationID);
 
