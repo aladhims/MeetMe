@@ -223,6 +223,7 @@ public class DirectMeActivity extends BaseActivity
     }
 
     private void closeDirect(){
+        Toast.makeText(this, "berhenti bertemu", Toast.LENGTH_SHORT).show();
         startActivity(new Intent(this,ListFriendActivity.class));
         finish();
     }
@@ -255,7 +256,11 @@ public class DirectMeActivity extends BaseActivity
 
     }
 
-
+    @Override
+    public void onBackPressed() {
+        Toast.makeText(this,"tidak boleh keluar dari screen ini dengan tombol back!",Toast.LENGTH_SHORT).show();
+        return;
+    }
 
     @Override
     protected void onStart() {
