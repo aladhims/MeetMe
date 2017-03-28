@@ -2,8 +2,11 @@ package win.aladhims.meetme;
 
 import android.Manifest;
 import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -12,6 +15,7 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
@@ -23,6 +27,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.BitmapImageViewTarget;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -69,11 +74,14 @@ public class DirectMeActivity extends BaseActivity
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest request;
-    private DatabaseReference rootRef,meetRef,chatRef;
+
     private final static String TAG = DirectMeActivity.class.getSimpleName();
     String[] perms = new String[]{Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.INTERNET};
 
     private FirebaseRecyclerAdapter<Chat,ChatViewHolder> mChatAdapter;
+    private DatabaseReference rootRef,meetRef,chatRef;
+
+    private Bitmap meBitmap, friendBitmap;
 
     @BindView(R.id.btn_chat_send)
     Button mBtnSendChat;
@@ -145,7 +153,8 @@ public class DirectMeActivity extends BaseActivity
                             .load(friend.getPhotoURL())
                             .into(ciTeman);
 
-                    tvTeman.setText(friend.getName());
+                    String[] firstName = friend.getName().split(" ");
+                    tvTeman.setText(firstName[0]);
                 }
             }
 

@@ -40,7 +40,8 @@
             android:theme="@style/NoBarTheme"/>
         <activity android:name=".SignInActivity">
         </activity>
-        <activity android:name=".ListFriendActivity">
+        <activity android:name=".ListFriendActivity"
+            android:theme="@style/NoBarTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
