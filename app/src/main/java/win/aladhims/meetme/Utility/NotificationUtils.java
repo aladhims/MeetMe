@@ -8,11 +8,13 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.os.CountDownTimer;
+import android.provider.Settings;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 
@@ -72,11 +74,13 @@ public class NotificationUtils {
     public static void NotifyMe(String inviterName, String inviterId,String meetID,Bitmap largeIcon,Context context){
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
         builder.setColor(ContextCompat.getColor(context, R.color.colorPrimary));
-        builder.setAutoCancel(true)
+        builder.setAutoCancel(false)
                 .setVibrate(new long[]{})
                 .setContentTitle(inviterName + " ingin ketemuan")
                 .setContentText(inviterName + " ingin ketemuan dengan anda")
-                .setSmallIcon(R.drawable.ic_photo_library);
+                .setSmallIcon(R.drawable.ic_photo_library)
+                .setOngoing(true)
+                .setColor(Color.BLUE);
 
 
 
@@ -100,16 +104,12 @@ public class NotificationUtils {
         builder.addAction(actionNo);
         builder.setPriority(Notification.PRIORITY_HIGH);
 
-        final NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        Notification notification = builder.build();
+        notification.defaults |= Notification.DEFAULT_VIBRATE;
+        notification.defaults |= Notification.DEFAULT_SOUND;
 
-        manager.notify(NOTIFYID,builder.build());
-        new CountDownTimer(30000, 1000) {
-            @Override
-            public void onTick(long millisUntilFinished) {}
-            @Override
-            public void onFinish() {
-                manager.cancelAll();
-            }
-        };
+        NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        manager.notify(NOTIFYID,notification);
     }
 }

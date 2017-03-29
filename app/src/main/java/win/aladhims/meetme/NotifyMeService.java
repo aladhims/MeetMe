@@ -1,6 +1,7 @@
 package win.aladhims.meetme;
 
 import android.app.IntentService;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -46,7 +47,6 @@ public class NotifyMeService extends IntentService {
                 rootRef = FirebaseDatabase.getInstance().getReference();
                 context = getApplicationContext();
                 userUID = intent.getStringExtra(ListFriendActivity.MYUIDEXTRAINTENT);
-                Log.d("SERVICES",userUID);
                 checkRef = rootRef.child("invite").child(userUID);
                 checkRef.addValueEventListener(new ValueEventListener() {
                     @Override
@@ -84,6 +84,9 @@ public class NotifyMeService extends IntentService {
                                 }
                             });
 
+                        }else{
+                            NotificationManager manager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
+                            manager.cancel(NOTIFYID);
                         }
                     }
 

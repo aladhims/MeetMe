@@ -23,6 +23,7 @@ public class FriendViewHolder extends RecyclerView.ViewHolder {
     public @BindView(R.id.tv_name_friend_list) TextView mTvFriendName;
     public @BindView(R.id.btn_meet_friend) Button mBtnMeetFriend;
     public @BindView(R.id.ll_friend_item) LinearLayout mLLFriend;
+    public @BindView(R.id.tv_friend_lastloc) TextView mTvLastLoc;
     public FriendViewHolder(View itemView) {
         super(itemView);
         ButterKnife.bind(this,itemView);

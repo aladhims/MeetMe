@@ -7,21 +7,30 @@
     android:layout_height="match_parent"
     tools:context="win.aladhims.meetme.ListFriendActivity">
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/friend_toolbar"
+    <FrameLayout
+        android:id="@+id/toolbar_container"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        android:elevation="4dp"
-        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+        android:layout_height="wrap_content">
 
-        <com.miguelcatalan.materialsearchview.MaterialSearchView
-            android:id="@+id/sv_list_friend"
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/friend_toolbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            android:elevation="4dp" />
 
-    </android.support.v7.widget.Toolbar>
+        <android.support.v7.widget.SearchView
+            android:id="@+id/sv_friend"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:searchIcon="@drawable/ic_search"
+            app:theme="@style/Widget.AppCompat.Light.SearchView"/>
+
+
+    </FrameLayout>
+
+
+
 
     <RelativeLayout
         android:layout_width="match_parent"

@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -80,8 +81,7 @@ public class DirectMeActivity extends BaseActivity
 
     private FirebaseRecyclerAdapter<Chat,ChatViewHolder> mChatAdapter;
     private DatabaseReference rootRef,meetRef,chatRef;
-
-    private Bitmap meBitmap, friendBitmap;
+    private ValueEventListener finishedListener;
 
     @BindView(R.id.btn_chat_send)
     Button mBtnSendChat;
@@ -141,6 +141,7 @@ public class DirectMeActivity extends BaseActivity
 
         Toolbar directToolbar = (Toolbar) findViewById(R.id.meet_toolbar);
         setSupportActionBar(directToolbar);
+        directToolbar.setTitleTextColor(Color.WHITE);
         final CircleImageView ciTeman = (CircleImageView) findViewById(R.id.ci_toolbar_meet);
         final TextView tvTeman = (TextView) findViewById(R.id.tv_toolbar_meet);
 
@@ -215,11 +216,12 @@ public class DirectMeActivity extends BaseActivity
             }
         });
 
-        meetRef.addValueEventListener(new ValueEventListener() {
+        finishedListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if(dataSnapshot.getValue() == null){
                     closeDirect();
+                    stopLocationUpdate();
                 }
             }
 
@@ -227,7 +229,7 @@ public class DirectMeActivity extends BaseActivity
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        });
+        };
 
     }
 
@@ -263,6 +265,10 @@ public class DirectMeActivity extends BaseActivity
             meetRef.child(myUid).updateChildren(upFirstLoc);
         }
 
+    }
+
+    private void stopLocationUpdate(){
+        LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient,this);
     }
 
     @Override
@@ -352,12 +358,14 @@ public class DirectMeActivity extends BaseActivity
 
     @Override
     public void onLocationChanged(Location location) {
-        //Every location change make a new request to Google Direction for new Polyline direction
+        //Every location change make a new request to Google Direction for new Polyline direction and update the last location for the user
         Map<String, Object> locChange = new HashMap<>();
-        locChange.put("LAT",location.getLatitude());
-        locChange.put("LONG",location.getLongitude());
+        locChange.put("/meet/"+meetID+"/"+myUid+"/LAT/",location.getLatitude());
+        locChange.put("/meet/"+meetID+"/"+myUid+"/LONG/",location.getLongitude());
+        locChange.put("/users/"+myUid+"/LAT/",location.getLatitude());
+        locChange.put("/users/"+myUid+"/LONG/",location.getLongitude());
 
-        meetRef.child(myUid).updateChildren(locChange);
+        rootRef.updateChildren(locChange);
         LatLng newLoc = new LatLng(location.getLatitude(),location.getLongitude());
         myMarker.setPosition(newLoc);
         //and also we check for friend location every our location change if the friend location if also change or not null
@@ -390,6 +398,7 @@ public class DirectMeActivity extends BaseActivity
                 }
             });
         }
+        meetRef.addValueEventListener(finishedListener);
     }
 
     @Override

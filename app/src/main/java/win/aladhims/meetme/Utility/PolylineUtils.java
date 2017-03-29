@@ -24,7 +24,6 @@ import java.util.ArrayList;
 
 public class PolylineUtils {
 
-    public static String Response;
 
     public static String requestJSONDirection(LatLng source,LatLng dest){
 
@@ -109,8 +108,7 @@ public class PolylineUtils {
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-                Response = response;
-                callback.onSuccess(Response);
+                callback.onSuccess(response);
 
             }
         }, new Response.ErrorListener() {

@@ -21,14 +21,29 @@
         app:border_width="2dp"
         app:border_color="#CFD8DC"/>
 
-    <TextView
-        android:id="@+id/tv_name_friend_list"
+    <LinearLayout
+        android:layout_gravity="center_vertical"
         android:layout_weight="2"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:textSize="18sp"
-        tools:text="Alfian Dhimas Nur Marita"/>
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_name_friend_list"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            tools:text="Alfian Dhimas Nur Marita"/>
+
+        <TextView
+            android:id="@+id/tv_friend_lastloc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            tools:text="Margo City"/>
+    </LinearLayout>
+
+
 
     <Button
         android:id="@+id/btn_meet_friend"
