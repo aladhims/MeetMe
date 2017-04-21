@@ -22,6 +22,7 @@
         app:border_color="#CFD8DC"/>
 
     <LinearLayout
+        android:id="@+id/wrapper_friend_name"
         android:layout_gravity="center_vertical"
         android:layout_weight="2"
         android:layout_width="0dp"
@@ -42,8 +43,6 @@
             android:textSize="12sp"
             tools:text="Margo City"/>
     </LinearLayout>
-
-
 
     <Button
         android:id="@+id/btn_meet_friend"

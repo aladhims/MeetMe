@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -86,14 +87,14 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if(task.isSuccessful()){
                     final FirebaseUser mUser = mAuth.getCurrentUser();
-                    Toast.makeText(getApplicationContext(), "berhasil sign in", Toast.LENGTH_SHORT).show();
                     User user = new User(mUser.getPhotoUrl().toString(),mUser.getDisplayName(),mUser.getEmail());
                     userRef.child(mUser.getUid()).setValue(user)
                             .addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
                                     if(task.isSuccessful()){
-                                        startActivity(new Intent(getApplicationContext(),ListFriendActivity.class));
+                                        Toast.makeText(SignInActivity.this,"Berhasil login",Toast.LENGTH_SHORT).show();
+                                        startActivity(new Intent(SignInActivity.this,ListFriendActivity.class));
                                         finish();
                                     }
                                 }
@@ -107,7 +108,6 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == RC_SIGN_IN_GOOGLE){
-            //react on user action in choosing google account
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             if(result.isSuccess()){
                 GoogleSignInAccount acc = result.getSignInAccount();
@@ -128,6 +128,5 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
     }
 }

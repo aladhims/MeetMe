@@ -71,7 +71,7 @@ public class NotificationUtils {
         }
     }
 
-    public static void NotifyMe(String inviterName, String inviterId,String meetID,Bitmap largeIcon,Context context){
+    public static void NotifyMe(String inviterName, String inviterId,String meetID,Bitmap largeIcon,Context context,String myUID){
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
         builder.setColor(ContextCompat.getColor(context, R.color.colorPrimary));
         builder.setAutoCancel(false)
@@ -82,10 +82,7 @@ public class NotificationUtils {
                 .setOngoing(true)
                 .setColor(Color.BLUE);
 
-
-
         builder.setLargeIcon(getCroppedBitmap(largeIcon));
-
 
         Intent yesIntent = new Intent(context,DirectMeActivity.class);
         yesIntent.putExtra(AGREEEXTRA,true);
@@ -93,16 +90,19 @@ public class NotificationUtils {
                 .putExtra(ListFriendActivity.MEETID,meetID);
 
         Intent NoIntent = new Intent(context,ButtonReceiverNotif.class);
-        NoIntent.putExtra("notificationID",NOTIFYID);
+        NoIntent.putExtra("notificationID",NOTIFYID)
+                .putExtra("invitedID",myUID);
 
         PendingIntent yesPendingIntent = PendingIntent.getActivity(context,0,yesIntent,PendingIntent.FLAG_UPDATE_CURRENT);
         PendingIntent dismissPendingIntent = PendingIntent.getBroadcast(context,1,NoIntent,PendingIntent.FLAG_UPDATE_CURRENT);
+
+        builder.setContentIntent(yesPendingIntent);
 
         NotificationCompat.Action actionYes = new NotificationCompat.Action(R.drawable.ic_send,"Okey!",yesPendingIntent);
         NotificationCompat.Action actionNo = new NotificationCompat.Action(R.drawable.ic_photo_library,"Nggak!",dismissPendingIntent);
         builder.addAction(actionYes);
         builder.addAction(actionNo);
-        builder.setPriority(Notification.PRIORITY_HIGH);
+        builder.setPriority(Notification.PRIORITY_MAX);
 
         Notification notification = builder.build();
         notification.defaults |= Notification.DEFAULT_VIBRATE;

@@ -37,25 +37,36 @@
         <activity
             android:name=".DirectMeActivity"
             android:label="@string/title_activity_direct_me"
-            android:theme="@style/NoBarTheme"/>
-        <activity android:name=".SignInActivity">
-        </activity>
-        <activity android:name=".ListFriendActivity"
+            android:parentActivityName=".ListFriendActivity"
+            android:theme="@style/NoBarTheme" />
+        <activity android:name=".SignInActivity"></activity>
+        <activity
+            android:name=".ListFriendActivity"
             android:theme="@style/NoBarTheme">
             <intent-filter>
-                <action android:name="android.intent.action.SEARCH"/>
+                <action android:name="android.intent.action.SEARCH" />
+
+            </intent-filter>
+
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
+        </activity>
+
+        <service
+            android:name=".NotifyMeService"
+            android:exported="false" />
+
+        <receiver android:name=".ButtonReceiverNotif" />
+
+        <activity android:name=".SplashScreen"
+            android:theme="@style/NoBarTheme">
+            <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <meta-data android:name="android.app.searchable"
-                android:resource="@xml/searchable"/>
         </activity>
-
-        <service android:name=".NotifyMeService"
-            android:exported="false"/>
-
-        <receiver android:name=".ButtonReceiverNotif"/>
     </application>
 
 </manifest>

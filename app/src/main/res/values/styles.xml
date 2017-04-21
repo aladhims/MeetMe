@@ -15,7 +15,7 @@
     </style>
     
     <style name="SearchViewTheme" parent="Widget.AppCompat.Light.SearchView">
-
+        <item name="android:textColorHint">@android:color/white</item>
     </style>
 
 </resources>

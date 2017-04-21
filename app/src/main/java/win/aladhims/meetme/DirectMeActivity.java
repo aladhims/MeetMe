@@ -9,6 +9,8 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.location.Location;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
@@ -24,6 +26,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -47,12 +50,16 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import org.w3c.dom.Text;
 
@@ -70,17 +77,20 @@ import win.aladhims.meetme.Utility.PolylineUtils;
 import win.aladhims.meetme.ViewHolder.ChatViewHolder;
 
 public class DirectMeActivity extends BaseActivity
-        implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
+        implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener, LocationListener, View.OnClickListener {
 
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest request;
 
     private final static String TAG = DirectMeActivity.class.getSimpleName();
+    private final static int CAMERA_RC = 0;
     String[] perms = new String[]{Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.INTERNET};
 
     private FirebaseRecyclerAdapter<Chat,ChatViewHolder> mChatAdapter;
     private DatabaseReference rootRef,meetRef,chatRef;
+    private StorageReference fotoChatRef;
     private ValueEventListener finishedListener;
 
     @BindView(R.id.btn_chat_send)
@@ -89,6 +99,8 @@ public class DirectMeActivity extends BaseActivity
     EditText mEtChatMessage;
     @BindView(R.id.rv_chat)
     RecyclerView mChatRecyclerView;
+    @BindView(R.id.iv_chat_pick_photo)
+    ImageView mIvPickPhotoChat;
 
     private Polyline mCurPolyLine;
     private MarkerOptions myMarkerOptions,friendMarkerOptions;
@@ -108,7 +120,6 @@ public class DirectMeActivity extends BaseActivity
         myUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         ButterKnife.bind(this);
-
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
@@ -173,7 +184,15 @@ public class DirectMeActivity extends BaseActivity
                     viewHolder.mTvSenderName.setVisibility(View.GONE);
                     viewHolder.mCiPhotoUserChat.setVisibility(View.GONE);
                     viewHolder.mMessageBody.setGravity(Gravity.END);
-                    viewHolder.mTvMessage.setText(model.getPesan());
+                    if(!(model.getPesan()==null)){
+                        viewHolder.mIvFotoPesan.setVisibility(View.GONE);
+                        viewHolder.mTvMessage.setText(model.getPesan());
+                    }else{
+                        viewHolder.mTvMessage.setVisibility(View.GONE);
+                        Glide.with(getApplicationContext())
+                                .load(model.getFotoPesanURL())
+                                .into(viewHolder.mIvFotoPesan);
+                    }
                 }else{
                     rootRef.child("users").child(model.getFromUid()).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
@@ -192,7 +211,16 @@ public class DirectMeActivity extends BaseActivity
 
                         }
                     });
-                    viewHolder.mTvMessage.setText(model.getPesan());
+                    if(!(model.getPesan()== null)) {
+                        viewHolder.mIvFotoPesan.setVisibility(View.GONE);
+                        viewHolder.mTvMessage.setText(model.getPesan());
+                    }else{
+                        viewHolder.mTvMessage.setVisibility(View.GONE);
+                        Glide.with(getApplicationContext())
+                                .load(model.getFotoPesanURL())
+                                .into(viewHolder.mIvFotoPesan);
+
+                    }
                 }
             }
         };
@@ -203,25 +231,15 @@ public class DirectMeActivity extends BaseActivity
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-
-
-        mBtnSendChat.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                String chatKey = chatRef.push().getKey();
-                Chat chat = new Chat(myUid,friendID,mEtChatMessage.getText().toString());
-                chatRef.child(chatKey).setValue(chat);
-                mEtChatMessage.setText("");
-            }
-        });
+        mBtnSendChat.setOnClickListener(this);
+        mIvPickPhotoChat.setOnClickListener(this);
 
         finishedListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if(dataSnapshot.getValue() == null){
-                    closeDirect();
                     stopLocationUpdate();
+                    closeDirect();
                 }
             }
 
@@ -231,11 +249,12 @@ public class DirectMeActivity extends BaseActivity
             }
         };
 
+        fotoChatRef = FirebaseStorage.getInstance().getReference().child("chat").child(meetID).child(myUid);
+
     }
 
     private void closeDirect(){
         Toast.makeText(this, "berhenti bertemu", Toast.LENGTH_SHORT).show();
-        startActivity(new Intent(this,ListFriendActivity.class));
         finish();
     }
 
@@ -267,6 +286,25 @@ public class DirectMeActivity extends BaseActivity
 
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == CAMERA_RC && resultCode == RESULT_OK){
+            Uri uri = data.getData();
+
+            fotoChatRef.putFile(uri)
+                    .addOnSuccessListener(this, new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            String downloadURL = taskSnapshot.getDownloadUrl().toString();
+
+                            Chat chat = new Chat(myUid,friendID,null,downloadURL);
+                            chatRef.push().setValue(chat);
+                        }
+                    });
+        }
+    }
+
     private void stopLocationUpdate(){
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient,this);
     }
@@ -281,9 +319,7 @@ public class DirectMeActivity extends BaseActivity
     protected void onStart() {
         if(mGoogleApiClient != null){
             mGoogleApiClient.connect();
-
         }
-
         super.onStart();
     }
 
@@ -416,6 +452,20 @@ public class DirectMeActivity extends BaseActivity
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.btn_chat_send:
+                String chatKey = chatRef.push().getKey();
+                Chat chat = new Chat(myUid,friendID,mEtChatMessage.getText().toString(),null);
+                chatRef.child(chatKey).setValue(chat);
+                mEtChatMessage.setText("");
+                break;
+            case R.id.iv_chat_pick_photo:
+                startActivityForResult(new Intent(MediaStore.ACTION_IMAGE_CAPTURE),CAMERA_RC);
         }
     }
 }

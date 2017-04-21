@@ -34,5 +34,10 @@
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"
             tools:text="ini adalah chat gua" />
+
+        <ImageView
+            android:id="@+id/iv_pesan_foto_chat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
     </LinearLayout>
 </LinearLayout>

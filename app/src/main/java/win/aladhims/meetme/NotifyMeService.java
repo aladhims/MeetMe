@@ -72,7 +72,7 @@ public class NotifyMeService extends IntentService {
 
                                             @Override
                                             protected void onPostExecute(Bitmap bitmap) {
-                                                NotificationUtils.NotifyMe(friendName, friendID, meetID, bitmap,context);
+                                                NotificationUtils.NotifyMe(friendName, friendID, meetID, bitmap,context,userUID);
                                             }
                                         }.execute();
                                     }
