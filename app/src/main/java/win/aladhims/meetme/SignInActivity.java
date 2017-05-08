@@ -7,6 +7,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.Auth;
@@ -29,6 +31,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import win.aladhims.meetme.Model.User;
+import win.aladhims.meetme.Utility.GradientBackgroundPainter;
 
 public class SignInActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener,GoogleApiClient.ConnectionCallbacks {
 
@@ -36,6 +39,9 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
 
     private GoogleApiClient mGoogleApiClient;
     @BindView(R.id.google_sign_in) SignInButton mBtnGoogleSignIn;
+    @BindView(R.id.fl_bg_sign_in) FrameLayout backgroundView;
+
+    GradientBackgroundPainter painter;
 
     //Firebase Fields
     private FirebaseAuth mAuth;
@@ -50,10 +56,20 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
 
         ButterKnife.bind(this);
 
+        mBtnGoogleSignIn.setColorScheme(SignInButton.COLOR_AUTO);
+        mBtnGoogleSignIn.setSize(SignInButton.SIZE_WIDE);
         mAuth = FirebaseAuth.getInstance();
         mDatabase = FirebaseDatabase.getInstance();
         mRef = mDatabase.getReference();
         userRef = mRef.child("users");
+
+        final int[] drawables = new int[3];
+        drawables[0] = R.drawable.gradient_1;
+        drawables[1] = R.drawable.gradient_2;
+        drawables[2] = R.drawable.gradient_3;
+
+        painter = new GradientBackgroundPainter(backgroundView,drawables);
+        painter.start();
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
@@ -114,6 +130,12 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
                 AuthWithGoogle(acc);
             }
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        painter.stop();
     }
 
     @Override

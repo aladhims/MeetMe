@@ -1,6 +1,5 @@
 package win.aladhims.meetme;
 
-import android.*;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.DialogInterface;
@@ -10,7 +9,6 @@ import android.os.CountDownTimer;
 import android.support.annotation.NonNull;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
@@ -64,8 +62,6 @@ public class ListFriendActivity extends BaseActivity implements GoogleApiClient.
     public static final String MEETID = "MEETID";
     String[] perms = new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.INTERNET};
 
-    int i;
-
     //Firebase Fields
     private FirebaseAuth mAuth;
     private FirebaseUser mUser;
@@ -95,7 +91,7 @@ public class ListFriendActivity extends BaseActivity implements GoogleApiClient.
         setSupportActionBar(toolbar);
         setTitle("List Friend");
         toolbar.setTitleTextColor(Color.WHITE);
-
+        rootRef = FirebaseDatabase.getInstance().getReference();
         mAuth = FirebaseAuth.getInstance();
         mUser = mAuth.getCurrentUser();
         if(mUser == null){
@@ -105,6 +101,22 @@ public class ListFriendActivity extends BaseActivity implements GoogleApiClient.
             Intent intent = new Intent(this,NotifyMeService.class);
             intent.putExtra(MYUIDEXTRAINTENT,mUser.getUid());
             startService(intent);
+            myFriendRef = rootRef.child("friends").child(mUser.getUid());
+            mAdapter = new Adapter(Boolean.class,R.layout.friend_item,FriendViewHolder.class,myFriendRef);
+            myFriendRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if(!dataSnapshot.hasChildren()){
+                        mProgressBar.setVisibility(View.INVISIBLE);
+                        mTvNoFriend.setVisibility(View.VISIBLE);
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
         }
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -112,12 +124,8 @@ public class ListFriendActivity extends BaseActivity implements GoogleApiClient.
                 .addApi(Auth.GOOGLE_SIGN_IN_API)
                 .build();
 
-        rootRef = FirebaseDatabase.getInstance().getReference();
         friendListRef = rootRef.child("users");
-        myFriendRef = rootRef.child("friends").child(mUser.getUid());
         meetRef = rootRef.child("meet");
-
-        mAdapter = new Adapter(Boolean.class,R.layout.friend_item,FriendViewHolder.class,myFriendRef);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false);
         mRecyclerView.setLayoutManager(layoutManager);
@@ -152,6 +160,7 @@ public class ListFriendActivity extends BaseActivity implements GoogleApiClient.
     }
 
     private void doQuery(String query){
+        mTvNoFriend.setVisibility(View.INVISIBLE);
         final Query q = friendListRef.orderByChild("email").equalTo(query);
         Log.d(TAG,q.toString());
         mProgressBar.setVisibility(View.VISIBLE);
@@ -263,6 +272,7 @@ public class ListFriendActivity extends BaseActivity implements GoogleApiClient.
                     boolean b = (Boolean) dataSnapshot.child("agree").getValue();
                     if (b) {
                         progressDialog.dismiss();
+                        timer.cancel();
                         Intent i = new Intent(getApplicationContext(), DirectMeActivity.class);
                         i.putExtra(MEETID, meetActId);
                         i.putExtra(FRIENDUID, uid);
@@ -270,6 +280,7 @@ public class ListFriendActivity extends BaseActivity implements GoogleApiClient.
                     }
                 }else{
                     progressDialog.dismiss();
+                    timer.cancel();
                     Toast.makeText(getApplicationContext(), friendName + " tidak menerima ajakan", Toast.LENGTH_LONG).show();
                 }
             }
@@ -322,6 +333,19 @@ public class ListFriendActivity extends BaseActivity implements GoogleApiClient.
                     mTvSearch.setVisibility(View.INVISIBLE);
                     mBtnSearch.setVisibility(View.INVISIBLE);
                     mTvNoResult.setVisibility(View.INVISIBLE);
+                    myFriendRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            if(!dataSnapshot.hasChildren()){
+                                mTvNoFriend.setVisibility(View.VISIBLE);
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
                 }
                 searchView.clearFocus();
                 searchView.setIconified(true);
@@ -338,6 +362,10 @@ public class ListFriendActivity extends BaseActivity implements GoogleApiClient.
                 mAuth.signOut();
                 startActivity(new Intent(this,SignInActivity.class));
                 finish();
+                return true;
+            case R.id.addFriend:
+                //TODO make activity to add friend
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -359,10 +387,10 @@ public class ListFriendActivity extends BaseActivity implements GoogleApiClient.
 
         @Override
         protected void populateViewHolder(final FriendViewHolder holder, final Boolean b, int position) {
+            mProgressBar.setVisibility(View.GONE);
             if(getItemCount() > 0){
                 mTvNoFriend.setVisibility(View.INVISIBLE);
             }
-            mProgressBar.setVisibility(View.GONE);
             final String uid = getRef(position).getKey();
             DatabaseReference reference = ref.child(uid);
             reference.addListenerForSingleValueEvent(new ValueEventListener() {

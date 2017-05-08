@@ -253,7 +253,7 @@ public class DirectMeActivity extends BaseActivity
 
     }
 
-    private void closeDirect(){
+    private synchronized void closeDirect(){
         Toast.makeText(this, "berhenti bertemu", Toast.LENGTH_SHORT).show();
         finish();
     }
@@ -311,8 +311,7 @@ public class DirectMeActivity extends BaseActivity
 
     @Override
     public void onBackPressed() {
-        Toast.makeText(this,"tidak boleh keluar dari screen ini dengan tombol back!",Toast.LENGTH_SHORT).show();
-        return;
+        Toast.makeText(this,"untuk mengakhiri pertemuan sentuh ikon silang",Toast.LENGTH_SHORT).show();
     }
 
     @Override

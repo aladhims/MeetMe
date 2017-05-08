@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "329205402723-uv2j82jqa2d53torqe43jmlaq23c5s86.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "win.aladhims.meetme",
+            "certificate_hash": "49c080a63ee28e72ad442cf595b7da74033a37ac"
+          }
+        },
+        {
           "client_id": "329205402723-kfuo7s6004qtijkrfit04d1hm1klhf0k.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

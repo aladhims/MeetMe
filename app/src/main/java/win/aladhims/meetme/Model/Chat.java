@@ -6,39 +6,8 @@ package win.aladhims.meetme.Model;
 
 public class Chat {
 
-    String fromUid;
-    String toUid;
-    String pesan;
-    String FotoPesanURL;
-
-    public Chat(){}
-
-    public Chat(String fromUid,String toUid,String pesan,String fotoPesanURL){
-        this.fromUid = fromUid;
-        this.toUid = toUid;
-        this.pesan = pesan;
-        this.FotoPesanURL = fotoPesanURL;
-    }
-
-    public String getFromUid() {
-        return fromUid;
-    }
-    public String getFotoPesanURL() {
-        return FotoPesanURL;
-    }
-
-    public void setFotoPesanURL(String fotoPesanURL) {
-        FotoPesanURL = fotoPesanURL;
-    }
-
-
-    public String getToUid() {
-        return toUid;
-    }
-
-    public String getPesan() {
-        return pesan;
-    }
+    private String fromUid;
+    private String toUid;
 
     public void setFromUid(String fromUid) {
         this.fromUid = fromUid;
@@ -51,4 +20,34 @@ public class Chat {
     public void setPesan(String pesan) {
         this.pesan = pesan;
     }
+
+    private String pesan;
+
+    public String getFromUid() {
+        return fromUid;
+    }
+
+    public String getToUid() {
+        return toUid;
+    }
+
+    public String getPesan() {
+        return pesan;
+    }
+
+    public String getFotoPesanURL() {
+        return FotoPesanURL;
+    }
+
+    private String FotoPesanURL;
+
+    public Chat(){}
+
+    public Chat(String fromUid,String toUid,String pesan,String url){
+        this.fromUid = fromUid;
+        this.toUid = toUid;
+        this.pesan = pesan;
+        this.FotoPesanURL = url;
+    }
+
 }

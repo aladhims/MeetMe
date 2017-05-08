@@ -73,7 +73,7 @@ public class NotificationUtils {
 
     public static void NotifyMe(String inviterName, String inviterId,String meetID,Bitmap largeIcon,Context context,String myUID){
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
-        builder.setColor(ContextCompat.getColor(context, R.color.colorPrimary));
+        builder.setColor(ContextCompat.getColor(context, R.color.colorAccent));
         builder.setAutoCancel(false)
                 .setVibrate(new long[]{})
                 .setContentTitle(inviterName + " ingin ketemuan")
@@ -81,6 +81,7 @@ public class NotificationUtils {
                 .setSmallIcon(R.drawable.ic_photo_library)
                 .setOngoing(true)
                 .setColor(Color.BLUE);
+
 
         builder.setLargeIcon(getCroppedBitmap(largeIcon));
 
@@ -98,8 +99,8 @@ public class NotificationUtils {
 
         builder.setContentIntent(yesPendingIntent);
 
-        NotificationCompat.Action actionYes = new NotificationCompat.Action(R.drawable.ic_send,"Okey!",yesPendingIntent);
-        NotificationCompat.Action actionNo = new NotificationCompat.Action(R.drawable.ic_photo_library,"Nggak!",dismissPendingIntent);
+        NotificationCompat.Action actionYes = new NotificationCompat.Action(R.drawable.ic_check,"Okey!",yesPendingIntent);
+        NotificationCompat.Action actionNo = new NotificationCompat.Action(R.drawable.ic_close,"Nggak!",dismissPendingIntent);
         builder.addAction(actionYes);
         builder.addAction(actionNo);
         builder.setPriority(Notification.PRIORITY_MAX);
