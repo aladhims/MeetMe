@@ -189,7 +189,7 @@ public class DirectMeActivity extends BaseActivity
                         viewHolder.mTvMessage.setText(model.getPesan());
                     }else{
                         viewHolder.mTvMessage.setVisibility(View.GONE);
-                        Glide.with(getApplicationContext())
+                        Glide.with(getParent())
                                 .load(model.getFotoPesanURL())
                                 .into(viewHolder.mIvFotoPesan);
                     }

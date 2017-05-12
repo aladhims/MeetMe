@@ -38,14 +38,14 @@
             android:label="@string/title_activity_direct_me"
             android:parentActivityName=".ListFriendActivity"
             android:theme="@style/NoBarTheme" />
-        <activity android:name=".SignInActivity"
-            android:theme="@style/NoBarTheme"></activity>
+        <activity
+            android:name=".SignInActivity"
+            android:theme="@style/NoBarTheme" />
         <activity
             android:name=".ListFriendActivity"
             android:theme="@style/NoBarTheme">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
-
             </intent-filter>
 
             <meta-data
@@ -59,7 +59,8 @@
 
         <receiver android:name=".ButtonReceiverNotif" />
 
-        <activity android:name=".SplashScreen"
+        <activity
+            android:name=".SplashScreen"
             android:theme="@style/NoBarTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -67,6 +68,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".WelcomeActivity"
+            android:theme="@style/NoBarTheme"></activity>
     </application>
 
 </manifest>

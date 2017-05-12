@@ -4,7 +4,6 @@
 
     <item
         android:id="@+id/action_search"
-        android:icon="@drawable/ic_search"
         android:orderInCategory="1"
         app:showAsAction="always"
         app:actionViewClass="android.support.v7.widget.SearchView"

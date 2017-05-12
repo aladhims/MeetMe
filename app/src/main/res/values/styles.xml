@@ -14,8 +14,9 @@
         <item name="windowNoTitle">true</item>
     </style>
     
-    <style name="SearchViewTheme" parent="Widget.AppCompat.Light.SearchView">
+    <style name="SearchViewTheme">
         <item name="android:textColorHint">@android:color/white</item>
+        <item name="android:textColor">@android:color/white</item>
     </style>
 
 </resources>

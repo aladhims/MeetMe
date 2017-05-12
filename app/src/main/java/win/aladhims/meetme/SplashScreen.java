@@ -2,10 +2,15 @@ package win.aladhims.meetme;
 
 import android.content.Intent;
 import android.content.IntentSender;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.Auth;
@@ -32,11 +37,15 @@ public class SplashScreen extends AppCompatActivity implements GoogleApiClient.O
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
 
+        changeStatusBarColor();
+
         if (googleApiClient == null) {
             googleApiClient = new GoogleApiClient.Builder(getApplicationContext())
                     .addApi(LocationServices.API)
                     .addOnConnectionFailedListener(this).build();
             googleApiClient.connect();
+
+
 
             LocationRequest locationRequest = LocationRequest.create();
             locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
@@ -66,7 +75,7 @@ public class SplashScreen extends AppCompatActivity implements GoogleApiClient.O
                                     // requests here.
                                     if(state.isGpsUsable() && state.isLocationUsable() && state.isNetworkLocationUsable()){
                                         googleApiClient.disconnect();
-                                        startActivity(new Intent(getApplicationContext(),ListFriendActivity.class));
+                                        startActivity(new Intent(getApplicationContext(),WelcomeActivity.class));
                                         finish();
                                     }
                                     break;
@@ -108,12 +117,20 @@ public class SplashScreen extends AppCompatActivity implements GoogleApiClient.O
             LocationSettingsStates settingsStates = LocationSettingsStates.fromIntent(data);
             if(settingsStates.isNetworkLocationUsable() && settingsStates.isGpsUsable() && settingsStates.isLocationUsable()){
                 googleApiClient.disconnect();
-                startActivity(new Intent(this,ListFriendActivity.class));
+                startActivity(new Intent(this,WelcomeActivity.class));
                 finish();
             }
         }else{
             Toast.makeText(this,"GPS dibutuhkan untuk menjalankan aplikasi ini",Toast.LENGTH_LONG).show();
             finish();
+        }
+    }
+
+    private void changeStatusBarColor(){
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+            Window window = getWindow();
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(ContextCompat.getColor(this,R.color.colorPrimary));
         }
     }
 }
