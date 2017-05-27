@@ -5,6 +5,7 @@
     <item
         android:id="@+id/action_search"
         android:orderInCategory="1"
+        android:icon="@drawable/ic_search"
         app:showAsAction="always"
         app:actionViewClass="android.support.v7.widget.SearchView"
         android:title="Search" />
@@ -14,13 +15,6 @@
         android:orderInCategory="1"
         android:title="Sign Out"
         app:showAsAction="never" />
-
-    <item
-        android:id="@+id/addFriend"
-        android:orderInCategory="2"
-        app:showAsAction="always"
-        android:title="add friend"
-        android:icon="@drawable/ic_person_add"/>
 
 
 </menu>

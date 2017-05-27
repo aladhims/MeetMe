@@ -35,11 +35,12 @@ public class Chat {
         return pesan;
     }
 
+
     public String getFotoPesanURL() {
-        return FotoPesanURL;
+        return fotoPesanURL;
     }
 
-    private String FotoPesanURL;
+    private String fotoPesanURL;
 
     public Chat(){}
 
@@ -47,7 +48,7 @@ public class Chat {
         this.fromUid = fromUid;
         this.toUid = toUid;
         this.pesan = pesan;
-        this.FotoPesanURL = url;
+        this.fotoPesanURL = url;
     }
 
 }

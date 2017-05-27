@@ -53,7 +53,6 @@ public class NotifyMeService extends IntentService {
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         if(dataSnapshot.getValue() != null) {
                             friendID = (String) dataSnapshot.child("inviter").getValue();
-                            Log.d("SERVICESFRIEND",friendID);
                             agree = (Boolean) dataSnapshot.child("agree").getValue();
                             meetID = (String) dataSnapshot.child("meetID").getValue();
                             rootRef.child("users").child(friendID).addListenerForSingleValueEvent(new ValueEventListener() {

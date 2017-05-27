@@ -9,7 +9,12 @@
     -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="true" />
     <uses-feature
         android:glEsVersion="0x00020000"
         android:required="true" />
@@ -36,6 +41,7 @@
         <activity
             android:name=".DirectMeActivity"
             android:label="@string/title_activity_direct_me"
+            android:launchMode="singleInstance"
             android:parentActivityName=".ListFriendActivity"
             android:theme="@style/NoBarTheme" />
         <activity
@@ -57,7 +63,11 @@
             android:name=".NotifyMeService"
             android:exported="false" />
 
-        <receiver android:name=".ButtonReceiverNotif" />
+        <receiver android:name=".ButtonReceiverNotif">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
 
         <activity
             android:name=".SplashScreen"
@@ -68,8 +78,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".WelcomeActivity"
-            android:theme="@style/NoBarTheme"></activity>
+        <activity
+            android:name=".WelcomeActivity"
+            android:theme="@style/NoBarTheme" />
+        <activity android:name=".AddFriendActivity"
+            android:parentActivityName=".ListFriendActivity"/>
     </application>
 
 </manifest>

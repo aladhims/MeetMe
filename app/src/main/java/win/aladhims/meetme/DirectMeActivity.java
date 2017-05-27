@@ -2,23 +2,22 @@ package win.aladhims.meetme;
 
 import android.Manifest;
 import android.app.NotificationManager;
-import android.content.Context;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Color;
 import android.location.Location;
 import android.net.Uri;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
@@ -31,18 +30,28 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.target.BitmapImageViewTarget;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.firebase.ui.storage.images.FirebaseImageLoader;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResult;
+import com.google.android.gms.location.LocationSettingsStates;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
@@ -61,9 +70,11 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
-import org.w3c.dom.Text;
-
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -73,6 +84,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 import pub.devrel.easypermissions.EasyPermissions;
 import win.aladhims.meetme.Model.Chat;
 import win.aladhims.meetme.Model.User;
+import win.aladhims.meetme.Utility.ImageUtils;
 import win.aladhims.meetme.Utility.PolylineUtils;
 import win.aladhims.meetme.ViewHolder.ChatViewHolder;
 
@@ -90,7 +102,7 @@ public class DirectMeActivity extends BaseActivity
 
     private FirebaseRecyclerAdapter<Chat,ChatViewHolder> mChatAdapter;
     private DatabaseReference rootRef,meetRef,chatRef;
-    private StorageReference fotoChatRef;
+    private StorageReference rootStorageRef,fotoChatRef;
     private ValueEventListener finishedListener;
 
     @BindView(R.id.btn_chat_send)
@@ -101,22 +113,27 @@ public class DirectMeActivity extends BaseActivity
     RecyclerView mChatRecyclerView;
     @BindView(R.id.iv_chat_pick_photo)
     ImageView mIvPickPhotoChat;
+    @BindView(R.id.ci_toolbar_meet) CircleImageView ciTeman;
 
     private Polyline mCurPolyLine;
-    private MarkerOptions myMarkerOptions,friendMarkerOptions;
-    private String myUid;
+    private MarkerOptions myMarkerOptions = new MarkerOptions(),friendMarkerOptions = new MarkerOptions();
+    private String myUid,friendPhotoURL,myPhotoURL,namaTeman,namaKu;
     private Marker myMarker,friendMarker;
     private boolean hasToMakeBound = true;
     private Location lastLoc;
     private LatLng friendLoc;
+    private Uri uri;
 
     private String friendID,meetID;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_direct_me);
         rootRef = FirebaseDatabase.getInstance().getReference();
+        rootStorageRef = FirebaseStorage.getInstance().getReference();
         myUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         ButterKnife.bind(this);
@@ -125,7 +142,6 @@ public class DirectMeActivity extends BaseActivity
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
                 .build();
-        createLocationReq();
 
         //get intent's data
         Intent i = getIntent();
@@ -139,10 +155,10 @@ public class DirectMeActivity extends BaseActivity
 
             rootRef.updateChildren(map);
         }
-
+        createLocationReq();
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
         builder.addLocationRequest(request);
-
+        checkLocationSet(builder);
         meetRef = rootRef.child("meet").child(meetID);
         chatRef = meetRef.child("chat");
 
@@ -153,7 +169,6 @@ public class DirectMeActivity extends BaseActivity
         Toolbar directToolbar = (Toolbar) findViewById(R.id.meet_toolbar);
         setSupportActionBar(directToolbar);
         directToolbar.setTitleTextColor(Color.WHITE);
-        final CircleImageView ciTeman = (CircleImageView) findViewById(R.id.ci_toolbar_meet);
         final TextView tvTeman = (TextView) findViewById(R.id.tv_toolbar_meet);
 
         rootRef.child("users").child(friendID).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -161,12 +176,30 @@ public class DirectMeActivity extends BaseActivity
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if(dataSnapshot.getValue()!= null){
                     User friend = dataSnapshot.getValue(User.class);
+                    friendPhotoURL = friend.getPhotoURL();
                     Glide.with(getApplicationContext())
-                            .load(friend.getPhotoURL())
+                            .load(friendPhotoURL)
                             .into(ciTeman);
 
                     String[] firstName = friend.getName().split(" ");
-                    tvTeman.setText(firstName[0]);
+                    namaTeman = firstName[0];
+                    tvTeman.setText(namaTeman);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+        rootRef.child("users").child(myUid).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.getValue()!=null){
+                    User me = dataSnapshot.getValue(User.class);
+                    myPhotoURL = me.getPhotoURL();
+                    String[] firstName = me.getName().split(" ");
+                    namaKu = firstName[0];
                 }
             }
 
@@ -176,23 +209,40 @@ public class DirectMeActivity extends BaseActivity
             }
         });
 
+        final RequestListener<String,GlideDrawable> listener = new RequestListener<String, GlideDrawable>() {
+            @Override
+            public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
+                Log.d(TAG,e.getMessage());
+                return false;
+            }
+
+            @Override
+            public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                return false;
+            }
+        };
         //the adapter for the chat between them
         mChatAdapter = new FirebaseRecyclerAdapter<Chat, ChatViewHolder>(Chat.class,R.layout.chat_item,ChatViewHolder.class,chatRef) {
             @Override
             protected void populateViewHolder(final ChatViewHolder viewHolder, final Chat model, int position) {
+                if(!(model.getPesan()== null)) {
+                    viewHolder.mIvFotoPesan.setVisibility(View.GONE);
+                    viewHolder.mTvMessage.setText(model.getPesan());
+                }else{
+                    Log.d(TAG,model.getFotoPesanURL());
+                    StorageReference reference = FirebaseStorage.getInstance().getReferenceFromUrl(model.getFotoPesanURL());
+                    viewHolder.mTvMessage.setVisibility(View.GONE);
+                    viewHolder.mIvFotoPesan.setVisibility(View.VISIBLE);
+                    Glide.with(getApplicationContext())
+                            .load(model.getFotoPesanURL())
+                            .listener(listener)
+                            .error(ContextCompat.getDrawable(getApplicationContext(),R.drawable.ic_black_person_add))
+                            .into(viewHolder.mIvFotoPesan);
+                }
                 if(model.getFromUid().equals(myUid)){
                     viewHolder.mTvSenderName.setVisibility(View.GONE);
                     viewHolder.mCiPhotoUserChat.setVisibility(View.GONE);
                     viewHolder.mMessageBody.setGravity(Gravity.END);
-                    if(!(model.getPesan()==null)){
-                        viewHolder.mIvFotoPesan.setVisibility(View.GONE);
-                        viewHolder.mTvMessage.setText(model.getPesan());
-                    }else{
-                        viewHolder.mTvMessage.setVisibility(View.GONE);
-                        Glide.with(getParent())
-                                .load(model.getFotoPesanURL())
-                                .into(viewHolder.mIvFotoPesan);
-                    }
                 }else{
                     rootRef.child("users").child(model.getFromUid()).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
@@ -201,7 +251,6 @@ public class DirectMeActivity extends BaseActivity
                             Glide.with(getApplicationContext())
                                     .load(user.getPhotoURL())
                                     .into(viewHolder.mCiPhotoUserChat);
-
                             viewHolder.mTvSenderName.setText(user.getName());
 
                         }
@@ -211,21 +260,13 @@ public class DirectMeActivity extends BaseActivity
 
                         }
                     });
-                    if(!(model.getPesan()== null)) {
-                        viewHolder.mIvFotoPesan.setVisibility(View.GONE);
-                        viewHolder.mTvMessage.setText(model.getPesan());
-                    }else{
-                        viewHolder.mTvMessage.setVisibility(View.GONE);
-                        Glide.with(getApplicationContext())
-                                .load(model.getFotoPesanURL())
-                                .into(viewHolder.mIvFotoPesan);
 
-                    }
                 }
             }
         };
 
         mChatRecyclerView.setAdapter(mChatAdapter);
+
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -249,8 +290,45 @@ public class DirectMeActivity extends BaseActivity
             }
         };
 
-        fotoChatRef = FirebaseStorage.getInstance().getReference().child("chat").child(meetID).child(myUid);
+        fotoChatRef = rootStorageRef.child("chat").child(meetID).child(myUid);
 
+    }
+
+    private void checkLocationSet(LocationSettingsRequest.Builder builder){
+        PendingResult<LocationSettingsResult> result =
+                LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient, builder.build());
+        result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
+            @Override
+            public void onResult(LocationSettingsResult result) {
+                final Status status = result.getStatus();
+                final LocationSettingsStates state = result.getLocationSettingsStates();
+                switch (status.getStatusCode()) {
+                    case LocationSettingsStatusCodes.SUCCESS:
+                        // All location settings are satisfied. The client can initialize location
+                        // requests here.
+                        if(state.isGpsUsable() && state.isLocationUsable() && state.isNetworkLocationUsable()){
+                            return;
+                        }
+                        break;
+                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                        // Location settings are not satisfied. But could be fixed by showing the user
+                        // a dialog.
+                        try {
+                            // Show the dialog by calling startResolutionForResult(),
+                            // and check the result in onActivityResult().
+                            status.startResolutionForResult(
+                                    DirectMeActivity.this, 1000);
+                        } catch (IntentSender.SendIntentException e) {
+                            e.printStackTrace();
+                        }
+                        break;
+                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                        // Location settings are not satisfied. However, we have no way to fix the
+                        // settings so we won't show the dialog.
+                        break;
+                }
+            }
+        });
     }
 
     private synchronized void closeDirect(){
@@ -286,22 +364,55 @@ public class DirectMeActivity extends BaseActivity
 
     }
 
+    private void uploadFotoChat(final Uri u,Bitmap bitmap){
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        byte[] bytes = stream.toByteArray();
+        fotoChatRef.child(u.getLastPathSegment()).putBytes(bytes)
+                .addOnSuccessListener(this, new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+
+                        String downloadURL = taskSnapshot.getDownloadUrl().toString();
+
+
+                        Chat chat = new Chat(myUid,friendID,null,downloadURL);
+                        chatRef.push().setValue(chat);
+                    }
+                });
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if(uri != null){
+            outState.putString("cameraImageUri",uri.toString());
+        }
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if(savedInstanceState.containsKey("cameraImageUri")){
+            uri = Uri.parse(savedInstanceState.getString("cameraImageUri"));
+        }
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == CAMERA_RC && resultCode == RESULT_OK){
-            Uri uri = data.getData();
-
-            fotoChatRef.putFile(uri)
-                    .addOnSuccessListener(this, new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                            String downloadURL = taskSnapshot.getDownloadUrl().toString();
-
-                            Chat chat = new Chat(myUid,friendID,null,downloadURL);
-                            chatRef.push().setValue(chat);
-                        }
-                    });
+            uri = data.getData();
+            Bitmap bmp = ImageUtils.compressImage(uri,this);
+            uploadFotoChat(uri,bmp);
+        }else if(requestCode == 1000 && resultCode == RESULT_OK){
+            LocationSettingsStates settingsStates = LocationSettingsStates.fromIntent(data);
+            if(settingsStates.isNetworkLocationUsable() && settingsStates.isGpsUsable() && settingsStates.isLocationUsable()){
+                return;
+            }
+        }else{
+            meetRef.removeValue();
+            closeDirect();
         }
     }
 
@@ -334,6 +445,7 @@ public class DirectMeActivity extends BaseActivity
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        Log.d(TAG,"Map is Ready");
         //make a new cool style for the map
         try {
             mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this,R.raw.mapraw));
@@ -341,11 +453,13 @@ public class DirectMeActivity extends BaseActivity
             Log.e(TAG,"error parsing raw");
         }
         mMap.setIndoorEnabled(true);
-        myMarkerOptions = new MarkerOptions();
         myMarkerOptions.draggable(false);
-        friendMarkerOptions = new MarkerOptions();
+        myMarkerOptions.title(namaKu);
+        myMarkerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
         friendMarkerOptions.draggable(false);
         friendMarkerOptions.position(new LatLng(-6.3660756,106.8346144));
+        friendMarkerOptions.title(namaTeman);
+        friendMarkerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
         myMarkerOptions.position(new LatLng(-6.23233,104.23245));
         if(lastLoc != null){
             myMarkerOptions.position(new LatLng(lastLoc.getLatitude(),lastLoc.getLongitude()));
@@ -378,7 +492,6 @@ public class DirectMeActivity extends BaseActivity
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         requestPerms();
-        Toast.makeText(this, "Connected to google", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -464,7 +577,10 @@ public class DirectMeActivity extends BaseActivity
                 mEtChatMessage.setText("");
                 break;
             case R.id.iv_chat_pick_photo:
-                startActivityForResult(new Intent(MediaStore.ACTION_IMAGE_CAPTURE),CAMERA_RC);
+                Intent i = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                if(i.resolveActivity(getPackageManager())!= null) {
+                    startActivityForResult(i, CAMERA_RC);
+                }
         }
     }
 }

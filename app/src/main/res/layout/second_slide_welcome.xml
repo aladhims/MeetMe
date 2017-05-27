@@ -12,13 +12,15 @@
         android:orientation="vertical">
 
         <ImageView
-            android:layout_width="120dp"
-            android:layout_height="120dp" />
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:src="@drawable/second_slide_logo"
+            />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Realtime"
+            android:text="Realtime Tracking"
             android:textAlignment="center"
             android:textColor="@android:color/white"
             android:textSize="30sp"
@@ -30,7 +32,7 @@
             android:layout_marginTop="20dp"
             android:paddingLeft="40dp"
             android:paddingRight="40dp"
-            android:text="menggunakan database berbasis NoSQL"
+            android:text="Tidak perlu saling tunggu, aplikasi ini akan melacak pergerakan kamu dan temanmu"
             android:textAlignment="center"
             android:textColor="@android:color/white"
             android:textSize="16sp" />

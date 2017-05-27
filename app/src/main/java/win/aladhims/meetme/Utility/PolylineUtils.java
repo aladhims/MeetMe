@@ -114,7 +114,7 @@ public class PolylineUtils {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.d("MAIN",error.getMessage());
+
             }
         });
 

@@ -39,6 +39,8 @@
             android:id="@+id/iv_pesan_foto_chat"
             android:layout_width="150dp"
             android:layout_height="150dp"
+            android:visibility="gone"
+            android:adjustViewBounds="true"
             android:scaleType="centerCrop"/>
     </LinearLayout>
 </LinearLayout>

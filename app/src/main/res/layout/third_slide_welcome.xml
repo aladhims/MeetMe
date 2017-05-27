@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_screen3">
+    android:background="@color/bg_screen2">
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -12,13 +12,15 @@
         android:orientation="vertical">
 
         <ImageView
-            android:layout_width="120dp"
-            android:layout_height="120dp" />
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:src="@drawable/third_slide_logo"
+            />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Realtime"
+            android:text="Find Your Mate"
             android:textAlignment="center"
             android:textColor="@android:color/white"
             android:textSize="30sp"
@@ -30,7 +32,7 @@
             android:layout_marginTop="20dp"
             android:paddingLeft="40dp"
             android:paddingRight="40dp"
-            android:text="menggunakan database berbasis NoSQL"
+            android:text="temukan temanmu disini dan mulai ketemuan!"
             android:textAlignment="center"
             android:textColor="@android:color/white"
             android:textSize="16sp" />

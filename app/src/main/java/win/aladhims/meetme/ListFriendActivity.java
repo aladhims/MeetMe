@@ -6,8 +6,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.CountDownTimer;
+import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -25,6 +27,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.firebase.ui.database.FirebaseIndexRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.common.ConnectionResult;
@@ -43,6 +46,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -65,9 +69,9 @@ public class ListFriendActivity extends BaseActivity implements GoogleApiClient.
     //Firebase Fields
     private FirebaseAuth mAuth;
     private FirebaseUser mUser;
-    private DatabaseReference rootRef,meetRef,myFriendRef;
+    private DatabaseReference rootRef,meetRef,myFriendRef,userRef;
     private Query friendListRef;
-    private FirebaseRecyclerAdapter<Boolean,FriendViewHolder> mAdapter;
+    private FirebaseIndexRecyclerAdapter<User,FriendViewHolder> mAdapter;
 
     private GoogleApiClient mGoogleApiClient;
 
@@ -81,6 +85,7 @@ public class ListFriendActivity extends BaseActivity implements GoogleApiClient.
     @BindView(R.id.tv_search_friend) TextView mTvSearch;
     @BindView(R.id.btn_search_friend) Button mBtnSearch;
     @BindView(R.id.tv_no_friend) TextView mTvNoFriend;
+    @BindView(R.id.fab_add_friend) FloatingActionButton mFabAddFriend;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,8 +93,18 @@ public class ListFriendActivity extends BaseActivity implements GoogleApiClient.
         setContentView(R.layout.activity_list_friend);
         ButterKnife.bind(this);
 
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this,this)
+                .addApi(Auth.GOOGLE_SIGN_IN_API)
+                .build();
         setSupportActionBar(toolbar);
         setTitle("List Friend");
+        mFabAddFriend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(ListFriendActivity.this,AddFriendActivity.class));
+            }
+        });
         toolbar.setTitleTextColor(Color.WHITE);
         rootRef = FirebaseDatabase.getInstance().getReference();
         mAuth = FirebaseAuth.getInstance();
@@ -102,7 +117,8 @@ public class ListFriendActivity extends BaseActivity implements GoogleApiClient.
             intent.putExtra(MYUIDEXTRAINTENT,mUser.getUid());
             startService(intent);
             myFriendRef = rootRef.child("friends").child(mUser.getUid());
-            mAdapter = new Adapter(Boolean.class,R.layout.friend_item,FriendViewHolder.class,myFriendRef);
+            userRef = rootRef.child("users");
+            mAdapter = new Adapter(User.class,R.layout.friend_item,FriendViewHolder.class,myFriendRef,userRef);
             myFriendRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -119,10 +135,7 @@ public class ListFriendActivity extends BaseActivity implements GoogleApiClient.
             });
         }
 
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .enableAutoManage(this,this)
-                .addApi(Auth.GOOGLE_SIGN_IN_API)
-                .build();
+
 
         friendListRef = rootRef.child("users");
         meetRef = rootRef.child("meet");
@@ -144,6 +157,17 @@ public class ListFriendActivity extends BaseActivity implements GoogleApiClient.
         if(Intent.ACTION_SEARCH.equals(i.getAction())){
             String query = i.getStringExtra(SearchManager.QUERY);
             doQuery(query);
+        }
+        if(mGoogleApiClient != null){
+            mGoogleApiClient.connect();
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if(mGoogleApiClient.isConnected()){
+            mGoogleApiClient.disconnect();
         }
     }
 
@@ -193,7 +217,10 @@ public class ListFriendActivity extends BaseActivity implements GoogleApiClient.
                                     mBtnSearch.setOnClickListener(new View.OnClickListener() {
                                         @Override
                                         public void onClick(View v) {
-                                            myFriendRef.child(dataSnapshot1.getKey()).setValue(true)
+                                            Map<String, Object> updateAdd = new HashMap<>();
+                                            updateAdd.put("/friends/"+"/"+mUser.getUid()+"/"+dataSnapshot1.getKey(),true);
+                                            updateAdd.put("/friends/"+"/"+dataSnapshot1.getKey()+"/"+mUser.getUid(),true);
+                                            rootRef.updateChildren(updateAdd)
                                                     .addOnCompleteListener(ListFriendActivity.this, new OnCompleteListener<Void>() {
                                                         @Override
                                                         public void onComplete(@NonNull Task<Void> task) {
@@ -271,16 +298,16 @@ public class ListFriendActivity extends BaseActivity implements GoogleApiClient.
                 if (dataSnapshot.getValue() != null) {
                     boolean b = (Boolean) dataSnapshot.child("agree").getValue();
                     if (b) {
-                        progressDialog.dismiss();
                         timer.cancel();
+                        progressDialog.dismiss();
                         Intent i = new Intent(getApplicationContext(), DirectMeActivity.class);
                         i.putExtra(MEETID, meetActId);
                         i.putExtra(FRIENDUID, uid);
                         startActivity(i);
                     }
                 }else{
-                    progressDialog.dismiss();
                     timer.cancel();
+                    progressDialog.dismiss();
                     Toast.makeText(getApplicationContext(), friendName + " tidak menerima ajakan", Toast.LENGTH_LONG).show();
                 }
             }
@@ -363,9 +390,6 @@ public class ListFriendActivity extends BaseActivity implements GoogleApiClient.
                 startActivity(new Intent(this,SignInActivity.class));
                 finish();
                 return true;
-            case R.id.addFriend:
-                //TODO make activity to add friend
-                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -377,67 +401,55 @@ public class ListFriendActivity extends BaseActivity implements GoogleApiClient.
 
     }
 
-    class Adapter extends FirebaseRecyclerAdapter<Boolean,FriendViewHolder>{
+    class Adapter extends FirebaseIndexRecyclerAdapter<User,FriendViewHolder> {
 
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("users");
-
-        public Adapter(Class<Boolean> modelClass, int modelLayout, Class<FriendViewHolder> viewHolderClass, Query ref) {
-            super(modelClass, modelLayout, viewHolderClass, ref);
+        public Adapter(Class<User> modelClass, @LayoutRes int modelLayout, Class<FriendViewHolder> viewHolderClass, Query keyRef, Query dataRef) {
+            super(modelClass, modelLayout, viewHolderClass, keyRef, dataRef);
         }
 
+
         @Override
-        protected void populateViewHolder(final FriendViewHolder holder, final Boolean b, int position) {
+        protected void populateViewHolder(final FriendViewHolder holder, final User user, int position) {
             mProgressBar.setVisibility(View.GONE);
             if(getItemCount() > 0){
                 mTvNoFriend.setVisibility(View.INVISIBLE);
             }
+
             final String uid = getRef(position).getKey();
-            DatabaseReference reference = ref.child(uid);
-            reference.addListenerForSingleValueEvent(new ValueEventListener() {
+            Glide.with(getApplicationContext())
+                    .load(user.getPhotoURL())
+                    .into(holder.mCiFriendPhoto);
+            String[] name = user.getName().split(" ");
+            holder.mTvFriendName.setText(name[0]);
+            rootRef.child("users").child(uid).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    final User user = dataSnapshot.getValue(User.class);
-                    Glide.with(getApplicationContext())
-                            .load(user.getPhotoURL())
-                            .into(holder.mCiFriendPhoto);
-                    String[] name = user.getName().split(" ");
-                    holder.mTvFriendName.setText(name[0]);
-                    rootRef.child("users").child(uid).addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            if(dataSnapshot.child("LAT").getValue()!=null&&dataSnapshot.child("LONG").getValue()!=null){
-                                double latitude = (Double) dataSnapshot.child("LAT").getValue();
-                                double longitude = (Double) dataSnapshot.child("LONG").getValue();
-                                LatLng latLng = new LatLng(latitude,longitude);
-                                String request = PlacesUtils.requestPlace(latLng);
-                                PolylineUtils.getResponse(getApplicationContext(), request, new PolylineUtils.VolleyCallback() {
-                                    @Override
-                                    public void onSuccess(String string) {
-                                        String place = PlacesUtils.getPlaces(string);
-                                        holder.mTvLastLoc.setText(place);
-                                    }
-                                });
-                            }else {
-                                holder.mTvLastLoc.setText("Lokasi terakhir tidak diketahui");
+                    if(dataSnapshot.child("LAT").getValue()!=null&&dataSnapshot.child("LONG").getValue()!=null){
+                        double latitude = (Double) dataSnapshot.child("LAT").getValue();
+                        double longitude = (Double) dataSnapshot.child("LONG").getValue();
+                        LatLng latLng = new LatLng(latitude,longitude);
+                        String request = PlacesUtils.requestPlace(latLng);
+                        PolylineUtils.getResponse(getApplicationContext(), request, new PolylineUtils.VolleyCallback() {
+                            @Override
+                            public void onSuccess(String string) {
+                                String place = PlacesUtils.getPlaces(string);
+                                holder.mTvLastLoc.setText(place);
                             }
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-
-                        }
-                    });
-                    holder.mBtnMeetFriend.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            doMeet(uid,user.getName());
-                        }
-                    });
+                        });
+                    }else {
+                        holder.mTvLastLoc.setText("Lokasi terakhir tidak diketahui");
+                    }
                 }
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
 
+                }
+            });
+            holder.mBtnMeetFriend.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    doMeet(uid,user.getName());
                 }
             });
         }

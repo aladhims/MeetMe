@@ -5,10 +5,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
-import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.Auth;
@@ -32,6 +30,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import win.aladhims.meetme.Model.User;
 import win.aladhims.meetme.Utility.GradientBackgroundPainter;
+import win.aladhims.meetme.Utility.PrefManager;
 
 public class SignInActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener,GoogleApiClient.ConnectionCallbacks {
 
@@ -103,13 +102,15 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if(task.isSuccessful()){
                     final FirebaseUser mUser = mAuth.getCurrentUser();
-                    User user = new User(mUser.getPhotoUrl().toString(),mUser.getDisplayName(),mUser.getEmail());
+                    final User user = new User(mUser.getPhotoUrl().toString(),mUser.getDisplayName(),mUser.getEmail());
                     userRef.child(mUser.getUid()).setValue(user)
                             .addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
                                     if(task.isSuccessful()){
                                         Toast.makeText(SignInActivity.this,"Berhasil login",Toast.LENGTH_SHORT).show();
+                                        PrefManager prefManager = new PrefManager(SignInActivity.this);
+                                        prefManager.setCurrentUID(mUser.getUid());
                                         startActivity(new Intent(SignInActivity.this,ListFriendActivity.class));
                                         finish();
                                     }
@@ -136,6 +137,22 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
     protected void onDestroy() {
         super.onDestroy();
         painter.stop();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if(mGoogleApiClient != null){
+            mGoogleApiClient.connect();
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (mGoogleApiClient.isConnected()){
+            mGoogleApiClient.disconnect();
+        }
     }
 
     @Override

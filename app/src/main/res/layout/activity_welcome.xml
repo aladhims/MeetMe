@@ -16,35 +16,18 @@
         android:layout_width="match_parent"
         android:layout_height="30dp"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="20dp"
+        android:layout_marginBottom="48dp"
         android:gravity="center"
         android:orientation="horizontal"></LinearLayout>
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:alpha=".5"
-        android:layout_above="@id/layoutDots"
-        android:background="@android:color/white" />
-
-    <Button
+    <android.support.design.widget.FloatingActionButton
         android:id="@+id/btn_next"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_margin="32dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:background="@null"
-        android:text="lanjut"
-        android:textColor="@android:color/white" />
+        android:background="#424242" />
 
-    <Button
-        android:id="@+id/btn_skip"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:background="@null"
-        android:text="skip"
-        android:textColor="@android:color/white" />
 
 </RelativeLayout>

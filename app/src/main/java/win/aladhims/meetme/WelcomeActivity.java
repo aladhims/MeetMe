@@ -3,7 +3,11 @@ package win.aladhims.meetme;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.TransitionDrawable;
 import android.os.Build;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -18,6 +22,8 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import win.aladhims.meetme.Utility.PrefManager;
+
 public class WelcomeActivity extends AppCompatActivity {
 
     private ViewPager mViewPager;
@@ -25,7 +31,7 @@ public class WelcomeActivity extends AppCompatActivity {
     private LinearLayout dotsLayout;
     private TextView[] dots;
     private int[] layouts;
-    private Button btnSkip,btnNext;
+    private FloatingActionButton btnNext;
     private PrefManager prefManager;
 
 
@@ -47,8 +53,7 @@ public class WelcomeActivity extends AppCompatActivity {
 
         mViewPager = (ViewPager) findViewById(R.id.view_pager);
         dotsLayout = (LinearLayout) findViewById(R.id.layoutDots);
-        btnSkip = (Button) findViewById(R.id.btn_skip);
-        btnNext = (Button) findViewById(R.id.btn_next);
+        btnNext = (FloatingActionButton) findViewById(R.id.btn_next);
 
         layouts = new int[]{
                 R.layout.first_slide_welcome,
@@ -63,13 +68,6 @@ public class WelcomeActivity extends AppCompatActivity {
         mViewPagerAdapter = new WelcomeViewPagerAdapter();
         mViewPager.setAdapter(mViewPagerAdapter);
         mViewPager.addOnPageChangeListener(viewPagerPageChangeListener);
-
-        btnSkip.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                launchHomeScreen();
-            }
-        });
 
         btnNext.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -88,20 +86,18 @@ public class WelcomeActivity extends AppCompatActivity {
     private void addBottomDots(int currentPage){
         dots = new TextView[layouts.length];
 
-        int[] colorsActive = getResources().getIntArray(R.array.array_dot_active);
-        int[] colorsInactive = getResources().getIntArray(R.array.array_dot_inactive);
 
         dotsLayout.removeAllViews();
         for(int i = 0;i < dots.length;i++){
             dots[i] = new TextView(this);
             dots[i].setText(Html.fromHtml("&#8226;"));
             dots[i].setTextSize(35);
-            dots[i].setTextColor(colorsInactive[currentPage]);
+            dots[i].setTextColor(ContextCompat.getColor(WelcomeActivity.this,R.color.dot_dark_screen2));
             dotsLayout.addView(dots[i]);
         }
 
         if(dots.length > 0){
-            dots[currentPage].setTextColor(colorsActive[currentPage]);
+            dots[currentPage].setTextColor(ContextCompat.getColor(WelcomeActivity.this,R.color.dot_light_screen2));
         }
     }
 
@@ -127,11 +123,9 @@ public class WelcomeActivity extends AppCompatActivity {
             addBottomDots(position);
 
             if(position == layouts.length-1){
-                btnNext.setText("masuk");
-                btnSkip.setVisibility(View.GONE);
+                btnNext.setImageDrawable(ContextCompat.getDrawable(WelcomeActivity.this,R.drawable.ic_check_white));
             }else{
-                btnNext.setText("lanjut");
-                btnSkip.setVisibility(View.VISIBLE);
+                btnNext.setImageDrawable(ContextCompat.getDrawable(WelcomeActivity.this,R.drawable.ic_arrow_forward));
             }
         }
 
