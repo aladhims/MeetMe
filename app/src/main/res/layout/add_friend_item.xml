@@ -12,8 +12,8 @@
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/ci_add_friend"
         android:layout_gravity="center_vertical"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         tools:src="@drawable/ic_photo_library"
@@ -33,6 +33,7 @@
             android:id="@+id/tv_add_friend_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
             android:textSize="18sp"
             tools:text="Alfian Dhimas Nur Marita"/>
 
@@ -40,8 +41,15 @@
             android:id="@+id/tv_add_friend_email"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
             android:textSize="12sp"
             tools:text="alfiandnm@gmail.com"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="8dp"
+            android:background="@color/colorUntukGaris" />
 
     </LinearLayout>
 
@@ -49,8 +57,6 @@
         android:id="@+id/btn_add_friend"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginEnd="16dp"
         android:textColor="@android:color/white"
         android:textStyle="bold"
         android:background="@drawable/ic_black_person_add"/>

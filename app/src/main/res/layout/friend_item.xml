@@ -12,8 +12,8 @@
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/ci_friend_list"
         android:layout_gravity="center_vertical"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         tools:src="@drawable/ic_photo_library"
@@ -33,6 +33,7 @@
             android:id="@+id/tv_name_friend_list"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
             android:textSize="18sp"
             tools:text="Alfian Dhimas Nur Marita"/>
 
@@ -40,17 +41,25 @@
             android:id="@+id/tv_friend_lastloc"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
             android:textSize="12sp"
             tools:text="Margo City"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="8dp"
+            android:background="@color/colorUntukGaris" />
+
+
     </LinearLayout>
 
     <Button
         android:id="@+id/btn_meet_friend"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@color/colorAccent"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="@drawable/ic_meet"
         android:textColor="@android:color/white"
-        android:textStyle="bold"
-        android:text="meet Me"/>
+        android:textStyle="bold"/>
 
 </LinearLayout>

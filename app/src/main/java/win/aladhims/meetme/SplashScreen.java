@@ -2,7 +2,6 @@ package win.aladhims.meetme;
 
 import android.content.Intent;
 import android.content.IntentSender;
-import android.graphics.Color;
 import android.os.Build;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -13,8 +12,6 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
 
-import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -29,7 +26,7 @@ import com.google.android.gms.location.LocationSettingsStatusCodes;
 
 public class SplashScreen extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener{
 
-    private GoogleApiClient googleApiClient;
+    private GoogleApiClient mGoogleApiClient;
 
 
     @Override
@@ -39,11 +36,11 @@ public class SplashScreen extends AppCompatActivity implements GoogleApiClient.O
 
         changeStatusBarColor();
 
-        if (googleApiClient == null) {
-            googleApiClient = new GoogleApiClient.Builder(getApplicationContext())
+        if (mGoogleApiClient == null) {
+            mGoogleApiClient = new GoogleApiClient.Builder(getApplicationContext())
                     .addApi(LocationServices.API)
                     .addOnConnectionFailedListener(this).build();
-            googleApiClient.connect();
+            mGoogleApiClient.connect();
 
 
 
@@ -63,7 +60,7 @@ public class SplashScreen extends AppCompatActivity implements GoogleApiClient.O
 
 
                     PendingResult<LocationSettingsResult> result =
-                            LocationServices.SettingsApi.checkLocationSettings(googleApiClient, builder.build());
+                            LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient, builder.build());
                     result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
                         @Override
                         public void onResult(LocationSettingsResult result) {
@@ -74,7 +71,7 @@ public class SplashScreen extends AppCompatActivity implements GoogleApiClient.O
                                     // All location settings are satisfied. The client can initialize location
                                     // requests here.
                                     if(state.isGpsUsable() && state.isLocationUsable() && state.isNetworkLocationUsable()){
-                                        googleApiClient.disconnect();
+                                        mGoogleApiClient.disconnect();
                                         startActivity(new Intent(getApplicationContext(),WelcomeActivity.class));
                                         finish();
                                     }
@@ -116,7 +113,7 @@ public class SplashScreen extends AppCompatActivity implements GoogleApiClient.O
 
             LocationSettingsStates settingsStates = LocationSettingsStates.fromIntent(data);
             if(settingsStates.isNetworkLocationUsable() && settingsStates.isGpsUsable() && settingsStates.isLocationUsable()){
-                googleApiClient.disconnect();
+                mGoogleApiClient.disconnect();
                 startActivity(new Intent(this,WelcomeActivity.class));
                 finish();
             }

@@ -113,7 +113,8 @@ public class DirectMeActivity extends BaseActivity
     RecyclerView mChatRecyclerView;
     @BindView(R.id.iv_chat_pick_photo)
     ImageView mIvPickPhotoChat;
-    @BindView(R.id.ci_toolbar_meet) CircleImageView ciTeman;
+    @BindView(R.id.ci_toolbar_meet)
+    CircleImageView ciTeman;
 
     private Polyline mCurPolyLine;
     private MarkerOptions myMarkerOptions = new MarkerOptions(),friendMarkerOptions = new MarkerOptions();

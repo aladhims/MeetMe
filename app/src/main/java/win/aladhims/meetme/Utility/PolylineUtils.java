@@ -40,7 +40,6 @@ public class PolylineUtils {
         urlString.append("&mode=walking");
         urlString.append("&key=");
         urlString.append("AIzaSyBpRrFNEzBSV6otvWJ0IXyV7hP4dEQ_OgA");
-        Log.d("HTTP",urlString.toString());
 
         return urlString.toString();
     }
@@ -92,7 +91,6 @@ public class PolylineUtils {
 
         } catch (JSONException e) {
             e.printStackTrace();
-            Log.e("MAIN", "ERROR JSON PARSING");
             return null;
         }
 

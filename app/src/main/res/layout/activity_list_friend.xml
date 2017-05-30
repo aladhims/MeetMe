@@ -1,110 +1,118 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     tools:context="win.aladhims.meetme.ListFriendActivity">
 
-    <FrameLayout
-        android:id="@+id/toolbar_container"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/friend_toolbar"
+        <FrameLayout
+            app:layout_anchorGravity="top"
+            android:id="@+id/toolbar_container"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            android:elevation="4dp" />
+            android:layout_height="wrap_content">
 
-        <android.support.v7.widget.SearchView
-            android:id="@+id/sv_friend"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:theme="@style/SearchViewTheme"
-            app:searchIcon="@drawable/ic_search" />
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/friend_toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="?attr/colorPrimary"
+                android:elevation="4dp" />
+
+            <android.support.v7.widget.SearchView
+                android:id="@+id/sv_friend"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:theme="@style/SearchViewTheme"
+                app:searchIcon="@drawable/ic_search" />
 
 
-    </FrameLayout>
-
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <TextView
-            android:id="@+id/tv_no_result"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:text="Tidak ditemukan"
-            android:textSize="22sp"
-            android:visibility="invisible" />
+        </FrameLayout>
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/rv_friend_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             tools:listitem="@layout/friend_item" />
+    </LinearLayout>
 
-        <ProgressBar
-            android:id="@+id/pg_friend_list"
-            style="?android:attr/progressBarStyleLarge"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true" />
+
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_add_friend"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="center"
+        android:src="@drawable/ic_person_add"
+        app:layout_behavior="win.aladhims.meetme.Utility.FabBehavior"
+        app:layout_anchor="@+id/rv_friend_list"
+        app:layout_anchorGravity="bottom|center"/>
+
+    <TextView
+        android:id="@+id/tv_no_result"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="Tidak ditemukan"
+        android:textSize="22sp"
+        android:visibility="invisible" />
+
+    <ProgressBar
+        android:id="@+id/pg_friend_list"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_centerInParent="true" />
+
+    <TextView
+        android:id="@+id/tv_no_friend"
+        android:layout_centerInParent="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:textSize="36sp"
+        android:visibility="invisible"
+        android:text="TIDAK ADA TEMAN"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/ci_search_friend"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:visibility="invisible" />
 
         <TextView
-            android:id="@+id/tv_no_friend"
-            android:layout_centerInParent="true"
+            android:id="@+id/tv_search_friend"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="36sp"
+            android:layout_marginTop="16dp"
+            android:textSize="22sp"
             android:visibility="invisible"
-            android:text="TIDAK ADA TEMAN"/>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_centerInParent="true"
-            android:gravity="center"
-            android:orientation="vertical">
+            tools:text="Alfian Dhimas Nur Marita" />
 
-            <de.hdodenhof.circleimageview.CircleImageView
-                android:id="@+id/ci_search_friend"
-                android:layout_width="120dp"
-                android:layout_height="120dp"
-                android:visibility="invisible" />
-
-            <TextView
-                android:id="@+id/tv_search_friend"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:textSize="22sp"
-                android:visibility="invisible"
-                tools:text="Alfian Dhimas Nur Marita" />
-
-            <Button
-                android:id="@+id/btn_search_friend"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:background="@color/colorAccent"
-                android:textColor="@android:color/white"
-                android:textStyle="bold"
-                android:visibility="invisible" />
-        </LinearLayout>
-
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/fab_add_friend"
+        <Button
+            android:id="@+id/btn_search_friend"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:layout_centerHorizontal="true"
-            android:layout_alignParentBottom="true"
-            android:src="@drawable/ic_person_add"/>
-    </RelativeLayout>
+            android:layout_marginTop="8dp"
+            android:background="@color/colorAccent"
+            android:textColor="@android:color/white"
+            android:textStyle="bold"
+            android:visibility="invisible" />
+    </LinearLayout>
 
-</LinearLayout>
+</android.support.design.widget.CoordinatorLayout>

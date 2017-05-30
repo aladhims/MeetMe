@@ -24,6 +24,7 @@
         android:id="@+id/btn_next"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:src="@drawable/ic_arrow_forward"
         android:layout_margin="32dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"

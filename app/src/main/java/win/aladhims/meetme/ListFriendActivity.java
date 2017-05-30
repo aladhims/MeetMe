@@ -53,6 +53,7 @@ import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
 import pub.devrel.easypermissions.EasyPermissions;
 import win.aladhims.meetme.Model.User;
+import win.aladhims.meetme.Utility.FabBehavior;
 import win.aladhims.meetme.Utility.PlacesUtils;
 import win.aladhims.meetme.Utility.PolylineUtils;
 import win.aladhims.meetme.ViewHolder.FriendViewHolder;
@@ -127,15 +128,12 @@ public class ListFriendActivity extends BaseActivity implements GoogleApiClient.
                         mTvNoFriend.setVisibility(View.VISIBLE);
                     }
                 }
-
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
 
                 }
             });
         }
-
-
 
         friendListRef = rootRef.child("users");
         meetRef = rootRef.child("meet");
@@ -177,6 +175,7 @@ public class ListFriendActivity extends BaseActivity implements GoogleApiClient.
             if(mTvNoResult.getVisibility() == View.VISIBLE){
                 mTvNoResult.setVisibility(View.INVISIBLE);
             }
+
             searchView.setIconified(true);
         }else {
             super.onBackPressed();
@@ -185,6 +184,7 @@ public class ListFriendActivity extends BaseActivity implements GoogleApiClient.
 
     private void doQuery(String query){
         mTvNoFriend.setVisibility(View.INVISIBLE);
+        mFabAddFriend.setVisibility(View.INVISIBLE);
         final Query q = friendListRef.orderByChild("email").equalTo(query);
         Log.d(TAG,q.toString());
         mProgressBar.setVisibility(View.VISIBLE);
@@ -356,6 +356,7 @@ public class ListFriendActivity extends BaseActivity implements GoogleApiClient.
                 //TODO make a layout for searching person and if it is closes, bring back recycler view
                 if(mRecyclerView.getVisibility()==View.INVISIBLE){
                     mRecyclerView.setVisibility(View.VISIBLE);
+                    mFabAddFriend.setVisibility(View.VISIBLE);
                     mCiSearch.setVisibility(View.INVISIBLE);
                     mTvSearch.setVisibility(View.INVISIBLE);
                     mBtnSearch.setVisibility(View.INVISIBLE);
