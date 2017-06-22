@@ -17,6 +17,7 @@
     <style name="SearchViewTheme">
         <item name="android:textColorHint">@android:color/white</item>
         <item name="android:textColor">@android:color/white</item>
+        <item name="android:editTextColor">@android:color/white</item>
     </style>
 
 </resources>

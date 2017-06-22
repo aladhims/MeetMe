@@ -1,8 +1,10 @@
 package win.aladhims.meetme;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -62,10 +64,11 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
         mRef = mDatabase.getReference();
         userRef = mRef.child("users");
 
-        final int[] drawables = new int[3];
+        final int[] drawables = new int[4];
         drawables[0] = R.drawable.gradient_1;
         drawables[1] = R.drawable.gradient_2;
         drawables[2] = R.drawable.gradient_3;
+        drawables[3] = R.drawable.gradient_4;
 
         painter = new GradientBackgroundPainter(backgroundView,drawables);
         painter.start();
@@ -96,6 +99,10 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
 
     //Authentication with google credential on FirebaseAuth and also save user's info to database
     private void AuthWithGoogle(GoogleSignInAccount account){
+        final ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setCancelable(false);
+        progressDialog.setMessage("Sedang Login");
+        progressDialog.show();
         AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(),null);
         mAuth.signInWithCredential(credential).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
             @Override
@@ -108,11 +115,14 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
                                     if(task.isSuccessful()){
-                                        Toast.makeText(SignInActivity.this,"Berhasil login",Toast.LENGTH_SHORT).show();
+                                        progressDialog.dismiss();
                                         PrefManager prefManager = new PrefManager(SignInActivity.this);
                                         prefManager.setCurrentUID(mUser.getUid());
                                         startActivity(new Intent(SignInActivity.this,ListFriendActivity.class));
                                         finish();
+                                    }else {
+                                        progressDialog.dismiss();
+                                        Toast.makeText(SignInActivity.this, "Gagal Login", Toast.LENGTH_SHORT).show();
                                     }
                                 }
                             });

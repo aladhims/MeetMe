@@ -85,8 +85,6 @@ public class WelcomeActivity extends AppCompatActivity {
 
     private void addBottomDots(int currentPage){
         dots = new TextView[layouts.length];
-
-
         dotsLayout.removeAllViews();
         for(int i = 0;i < dots.length;i++){
             dots[i] = new TextView(this);

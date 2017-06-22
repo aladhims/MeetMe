@@ -1,19 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#20d2bb</color>
-    <color name="colorPrimaryDark">#14a895</color>
-    <color name="colorAccent">#FFC107</color>
+    <color name="colorPrimary">#00BCD4</color>
+    <color name="colorPrimaryDark">#0097A7</color>
+    <color name="colorAccent">#FF5722</color>
 
     <color name="colorUntukGaris">#CFD8DC</color>
 
-    <color name="color1">#9C27B0</color>
-    <color name="color2">#FF4081</color>
-    <color name="color3">#40C4FF</color>
-    <color name="color4">#F8BBD0</color>
-    <color name="color5">#00E5FF</color>
-    <color name="color6">#607D8B</color>
-    <color name="color7">#FF9100</color>
-    <color name="color8">#FFAB00</color>
+    <color name="grad1_c1">#c2e59c</color>
+    <color name="grad1_c2">#64b3f4</color>
+    <color name="grad1_c3">#00C9FF</color>
+    <color name="grad1_c4">#92FE9D</color>
+
+    <color name="grad2_c1">#FC354C</color>
+    <color name="grad2_c2">#0ABFBC</color>
+    <color name="grad2_c3">#5f2c82</color>
+    <color name="grad2_c4">#49a09d</color>
+    <color name="grad2_c5">#514A9D</color>
+    <color name="grad2_c6">#24C6DC</color>
+    <color name="grad2_c7">#283c86</color>
+    <color name="grad2_c8">#45a247</color>
+
+    <color name="grad3_c1">#1D4350</color>
+    <color name="grad3_c2">#A43931</color>
+    <color name="grad3_c3">#0099F7</color>
+    <color name="grad3_c4">#A43931</color>
+    <color name="grad3_c5">#3a6186</color>
+    <color name="grad3_c6">#89253e</color>
 
     <color name="bg_screen1">#f64c73</color>
     <color name="bg_screen2">#20d2bb</color>

@@ -68,8 +68,6 @@ public class SplashScreen extends AppCompatActivity implements GoogleApiClient.O
                             final LocationSettingsStates state = result.getLocationSettingsStates();
                             switch (status.getStatusCode()) {
                                 case LocationSettingsStatusCodes.SUCCESS:
-                                    // All location settings are satisfied. The client can initialize location
-                                    // requests here.
                                     if(state.isGpsUsable() && state.isLocationUsable() && state.isNetworkLocationUsable()){
                                         mGoogleApiClient.disconnect();
                                         startActivity(new Intent(getApplicationContext(),WelcomeActivity.class));
@@ -77,11 +75,7 @@ public class SplashScreen extends AppCompatActivity implements GoogleApiClient.O
                                     }
                                     break;
                                 case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-                                    // Location settings are not satisfied. But could be fixed by showing the user
-                                    // a dialog.
                                     try {
-                                        // Show the dialog by calling startResolutionForResult(),
-                                        // and check the result in onActivityResult().
                                         status.startResolutionForResult(
                                                 SplashScreen.this, 1000);
                                     } catch (IntentSender.SendIntentException e) {
@@ -89,8 +83,6 @@ public class SplashScreen extends AppCompatActivity implements GoogleApiClient.O
                                     }
                                     break;
                                 case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-                                    // Location settings are not satisfied. However, we have no way to fix the
-                                    // settings so we won't show the dialog.
                                     break;
                             }
                         }
@@ -110,7 +102,6 @@ public class SplashScreen extends AppCompatActivity implements GoogleApiClient.O
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == 1000 && resultCode == RESULT_OK){
-
             LocationSettingsStates settingsStates = LocationSettingsStates.fromIntent(data);
             if(settingsStates.isNetworkLocationUsable() && settingsStates.isGpsUsable() && settingsStates.isLocationUsable()){
                 mGoogleApiClient.disconnect();

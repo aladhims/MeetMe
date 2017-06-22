@@ -34,7 +34,6 @@ import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
-import com.firebase.ui.storage.images.FirebaseImageLoader;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -71,10 +70,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -231,7 +227,6 @@ public class DirectMeActivity extends BaseActivity
                     viewHolder.mTvMessage.setText(model.getPesan());
                 }else{
                     Log.d(TAG,model.getFotoPesanURL());
-                    StorageReference reference = FirebaseStorage.getInstance().getReferenceFromUrl(model.getFotoPesanURL());
                     viewHolder.mTvMessage.setVisibility(View.GONE);
                     viewHolder.mIvFotoPesan.setVisibility(View.VISIBLE);
                     Glide.with(getApplicationContext())
@@ -418,7 +413,11 @@ public class DirectMeActivity extends BaseActivity
     }
 
     private void stopLocationUpdate(){
-        LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient,this);
+        if(mGoogleApiClient.isConnected()){
+            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient,this);
+            mGoogleApiClient.disconnect();
+        }
+
     }
 
     @Override

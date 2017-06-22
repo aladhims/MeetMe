@@ -11,6 +11,7 @@ import android.support.annotation.NonNull;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
@@ -22,6 +23,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -46,14 +48,12 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
 import pub.devrel.easypermissions.EasyPermissions;
 import win.aladhims.meetme.Model.User;
-import win.aladhims.meetme.Utility.FabBehavior;
 import win.aladhims.meetme.Utility.PlacesUtils;
 import win.aladhims.meetme.Utility.PolylineUtils;
 import win.aladhims.meetme.ViewHolder.FriendViewHolder;
@@ -81,12 +81,12 @@ public class ListFriendActivity extends BaseActivity implements GoogleApiClient.
     @BindView(R.id.rv_friend_list) RecyclerView mRecyclerView;
     @BindView(R.id.pg_friend_list) ProgressBar mProgressBar;
     @BindView(R.id.friend_toolbar) Toolbar toolbar;
-    @BindView(R.id.tv_no_result) TextView mTvNoResult;
     @BindView(R.id.ci_search_friend) CircleImageView mCiSearch;
     @BindView(R.id.tv_search_friend) TextView mTvSearch;
     @BindView(R.id.btn_search_friend) Button mBtnSearch;
-    @BindView(R.id.tv_no_friend) TextView mTvNoFriend;
+    @BindView(R.id.iv_no_friends) ImageView mIvNoFriends;
     @BindView(R.id.fab_add_friend) FloatingActionButton mFabAddFriend;
+    @BindView(R.id.iv_no_result) ImageView mIvNoResult;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -125,7 +125,7 @@ public class ListFriendActivity extends BaseActivity implements GoogleApiClient.
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     if(!dataSnapshot.hasChildren()){
                         mProgressBar.setVisibility(View.INVISIBLE);
-                        mTvNoFriend.setVisibility(View.VISIBLE);
+                        mIvNoFriends.setVisibility(View.VISIBLE);
                     }
                 }
                 @Override
@@ -172,8 +172,8 @@ public class ListFriendActivity extends BaseActivity implements GoogleApiClient.
     @Override
     public void onBackPressed() {
         if(!searchView.isIconified()){
-            if(mTvNoResult.getVisibility() == View.VISIBLE){
-                mTvNoResult.setVisibility(View.INVISIBLE);
+            if(mIvNoResult.getVisibility() == View.VISIBLE){
+                mIvNoResult.setVisibility(View.INVISIBLE);
             }
 
             searchView.setIconified(true);
@@ -183,7 +183,7 @@ public class ListFriendActivity extends BaseActivity implements GoogleApiClient.
     }
 
     private void doQuery(String query){
-        mTvNoFriend.setVisibility(View.INVISIBLE);
+        mIvNoFriends.setVisibility(View.INVISIBLE);
         mFabAddFriend.setVisibility(View.INVISIBLE);
         final Query q = friendListRef.orderByChild("email").equalTo(query);
         Log.d(TAG,q.toString());
@@ -250,7 +250,7 @@ public class ListFriendActivity extends BaseActivity implements GoogleApiClient.
                     mTvSearch.setText(user.getName());
 
                 }else{
-                    mTvNoResult.setVisibility(View.VISIBLE);
+                    mIvNoResult.setVisibility(View.VISIBLE);
                 }
             }
 
@@ -262,7 +262,7 @@ public class ListFriendActivity extends BaseActivity implements GoogleApiClient.
     }
 
     private void doMeet(final String uid, final String friendName){
-        final ProgressDialog progressDialog = makeRawProgressDialog("menunggu respon");
+        final ProgressDialog progressDialog = makeRawProgressDialog("Menunggu Respon");
         progressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "batal", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -320,7 +320,7 @@ public class ListFriendActivity extends BaseActivity implements GoogleApiClient.
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.list_friend_menu,menu);
 
-        MenuItem searchItem = menu.findItem(R.id.action_search);
+        final MenuItem searchItem = menu.findItem(R.id.action_search);
         SearchManager searchManager = (SearchManager) getApplicationContext().getSystemService(SEARCH_SERVICE);
 
         if(searchItem != null){
@@ -343,10 +343,43 @@ public class ListFriendActivity extends BaseActivity implements GoogleApiClient.
                 mCiSearch.setVisibility(View.INVISIBLE);
                 mTvSearch.setVisibility(View.INVISIBLE);
                 mBtnSearch.setVisibility(View.INVISIBLE);
-                mTvNoResult.setVisibility(View.INVISIBLE);
+                mIvNoResult.setVisibility(View.INVISIBLE);
                 return true;
             }
         });
+        MenuItemCompat.setOnActionExpandListener(searchItem, new MenuItemCompat.OnActionExpandListener() {
+            @Override
+            public boolean onMenuItemActionExpand(MenuItem item) {
+                return true;
+            }
+
+            @Override
+            public boolean onMenuItemActionCollapse(MenuItem item) {
+                if(mRecyclerView.getVisibility()==View.INVISIBLE){
+                    mRecyclerView.setVisibility(View.VISIBLE);
+                    mFabAddFriend.setVisibility(View.VISIBLE);
+                    mCiSearch.setVisibility(View.INVISIBLE);
+                    mTvSearch.setVisibility(View.INVISIBLE);
+                    mBtnSearch.setVisibility(View.INVISIBLE);
+                    mIvNoResult.setVisibility(View.INVISIBLE);
+                    myFriendRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            if(!dataSnapshot.hasChildren()){
+                                mIvNoFriends.setVisibility(View.VISIBLE);
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+                }
+                return true;
+            }
+        });
+
         searchView.startLayoutAnimation();
         ImageView closeButton = (ImageView) searchView.findViewById(android.support.v7.appcompat.R.id.search_close_btn);
         closeButton.setOnClickListener(new View.OnClickListener() {
@@ -360,12 +393,12 @@ public class ListFriendActivity extends BaseActivity implements GoogleApiClient.
                     mCiSearch.setVisibility(View.INVISIBLE);
                     mTvSearch.setVisibility(View.INVISIBLE);
                     mBtnSearch.setVisibility(View.INVISIBLE);
-                    mTvNoResult.setVisibility(View.INVISIBLE);
+                    mIvNoResult.setVisibility(View.INVISIBLE);
                     myFriendRef.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             if(!dataSnapshot.hasChildren()){
-                                mTvNoFriend.setVisibility(View.VISIBLE);
+                                mIvNoFriends.setVisibility(View.VISIBLE);
                             }
                         }
 
@@ -375,6 +408,7 @@ public class ListFriendActivity extends BaseActivity implements GoogleApiClient.
                         }
                     });
                 }
+                searchItem.collapseActionView();
                 searchView.clearFocus();
                 searchView.setIconified(true);
             }
@@ -413,7 +447,7 @@ public class ListFriendActivity extends BaseActivity implements GoogleApiClient.
         protected void populateViewHolder(final FriendViewHolder holder, final User user, int position) {
             mProgressBar.setVisibility(View.GONE);
             if(getItemCount() > 0){
-                mTvNoFriend.setVisibility(View.INVISIBLE);
+                mIvNoFriends.setVisibility(View.INVISIBLE);
             }
 
             final String uid = getRef(position).getKey();

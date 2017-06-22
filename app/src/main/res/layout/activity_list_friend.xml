@@ -29,8 +29,7 @@
                 android:id="@+id/sv_friend"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:theme="@style/SearchViewTheme"
-                app:searchIcon="@drawable/ic_search" />
+                android:theme="@style/SearchViewTheme"/>
 
 
         </FrameLayout>
@@ -56,14 +55,13 @@
         app:layout_anchor="@+id/rv_friend_list"
         app:layout_anchorGravity="bottom|center"/>
 
-    <TextView
-        android:id="@+id/tv_no_result"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <ImageView
+        android:id="@+id/iv_no_result"
         android:layout_gravity="center"
-        android:text="Tidak ditemukan"
-        android:textSize="22sp"
-        android:visibility="invisible" />
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:visibility="invisible"
+        android:background="@drawable/no_results"/>
 
     <ProgressBar
         android:id="@+id/pg_friend_list"
@@ -73,15 +71,14 @@
         android:layout_gravity="center"
         android:layout_centerInParent="true" />
 
-    <TextView
-        android:id="@+id/tv_no_friend"
-        android:layout_centerInParent="true"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:textSize="36sp"
+    <ImageView
+        android:id="@+id/iv_no_friends"
         android:visibility="invisible"
-        android:text="TIDAK ADA TEMAN"/>
+        android:layout_marginTop="72dp"
+        android:layout_gravity="center"
+        android:background="@drawable/no_friends_logo"
+        android:layout_width="350dp"
+        android:layout_height="400dp" />
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
