@@ -23,14 +23,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.firebase.ui.database.FirebaseIndexRecyclerAdapter;
-import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -386,7 +384,6 @@ public class ListFriendActivity extends BaseActivity implements GoogleApiClient.
             @Override
             public void onClick(View v) {
                 searchView.setQuery("",false);
-                //TODO make a layout for searching person and if it is closes, bring back recycler view
                 if(mRecyclerView.getVisibility()==View.INVISIBLE){
                     mRecyclerView.setVisibility(View.VISIBLE);
                     mFabAddFriend.setVisibility(View.VISIBLE);

@@ -108,7 +108,7 @@ public class SplashScreen extends AppCompatActivity implements GoogleApiClient.O
                 startActivity(new Intent(this,WelcomeActivity.class));
                 finish();
             }
-        }else{
+        } else {
             Toast.makeText(this,"GPS dibutuhkan untuk menjalankan aplikasi ini",Toast.LENGTH_LONG).show();
             finish();
         }

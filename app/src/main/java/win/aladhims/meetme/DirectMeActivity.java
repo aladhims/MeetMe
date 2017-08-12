@@ -9,7 +9,6 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.location.Location;
 import android.net.Uri;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -100,6 +99,8 @@ public class DirectMeActivity extends BaseActivity
     private DatabaseReference rootRef,meetRef,chatRef;
     private StorageReference rootStorageRef,fotoChatRef;
     private ValueEventListener finishedListener;
+
+
 
     @BindView(R.id.btn_chat_send)
     Button mBtnSendChat;

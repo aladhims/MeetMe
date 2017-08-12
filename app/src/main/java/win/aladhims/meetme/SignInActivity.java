@@ -4,7 +4,6 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -44,7 +43,6 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
 
     GradientBackgroundPainter painter;
 
-    //Firebase Fields
     private FirebaseAuth mAuth;
     private FirebaseDatabase mDatabase;
     private DatabaseReference mRef,userRef;
@@ -97,7 +95,6 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
     }
 
 
-    //Authentication with google credential on FirebaseAuth and also save user's info to database
     private void AuthWithGoogle(GoogleSignInAccount account){
         final ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setCancelable(false);

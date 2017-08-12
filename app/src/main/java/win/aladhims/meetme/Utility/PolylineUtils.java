@@ -1,7 +1,6 @@
 package win.aladhims.meetme.Utility;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.util.Log;
 
 import com.android.volley.Request;

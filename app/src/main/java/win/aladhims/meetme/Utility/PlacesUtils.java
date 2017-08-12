@@ -1,6 +1,5 @@
 package win.aladhims.meetme.Utility;
 
-import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 

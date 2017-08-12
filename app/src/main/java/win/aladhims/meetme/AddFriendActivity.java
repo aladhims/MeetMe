@@ -1,16 +1,12 @@
 package win.aladhims.meetme;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
 import com.bumptech.glide.Glide;
@@ -23,12 +19,9 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import butterknife.BindView;
@@ -89,20 +82,6 @@ public class AddFriendActivity extends BaseActivity {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
                                         Snackbar.make(v,"mulai berteman dengan " + name[0],Snackbar.LENGTH_SHORT).show();
-                                        viewHolder.mBtnAddFriend.setBackground(ContextCompat.getDrawable(getApplicationContext(),R.drawable.ic_person_remove));
-                                        viewHolder.mBtnAddFriend.setOnClickListener(new View.OnClickListener() {
-                                            @Override
-                                            public void onClick(View v) {
-                                                rootRef.child("friends").child(mUser.getUid()).child(uidItem).removeValue();
-                                                rootRef.child("friends").child(uidItem).child(mUser.getUid()).removeValue()
-                                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                            @Override
-                                                            public void onComplete(@NonNull Task<Void> task) {
-                                                                viewHolder.mBtnAddFriend.setBackground(ContextCompat.getDrawable(getApplicationContext(),R.drawable.ic_black_person_add));
-                                                            }
-                                                        });
-                                            }
-                                        });
                                     }
                                 });
                     }
@@ -113,19 +92,17 @@ public class AddFriendActivity extends BaseActivity {
                     public void onClick(final View v) {
                         rootRef.child("friends").child(mUser.getUid()).child(uidItem).removeValue();
                         rootRef.child("friends").child(uidItem).child(mUser.getUid()).removeValue()
-                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                               .addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
                                         Snackbar.make(v,"berhenti berteman dengan " + name[0],Snackbar.LENGTH_SHORT).show();
-                                        viewHolder.mBtnAddFriend.setBackground(ContextCompat.getDrawable(getApplicationContext(),R.drawable.ic_black_person_add));
-                                        viewHolder.mBtnAddFriend.setOnClickListener(follow);
                                     }
                                 });
                     }
                 };
 
                 rootRef.child("friends").child(mUser.getUid()).child(uidItem)
-                        .addListenerForSingleValueEvent(new ValueEventListener() {
+                        .addValueEventListener(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
                                 if (dataSnapshot.getValue() == null) {

@@ -49,7 +49,6 @@ dependencies {
     compile 'com.google.firebase:firebase-perf:10.2.6'
 
     compile 'com.android.support.constraint:constraint-layout:1.0.1'
-    compile 'com.google.maps.android:android-maps-utils:0.4+'
     testCompile 'junit:junit:4.12'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
 }
