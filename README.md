@@ -1,9 +1,15 @@
 # MeetMe
-An Android apps that using google maps to track realtime location between two people that wanna meet with chat feature, and realtime tracking
+> An Android apps that using google maps to track realtime location between two people that wanna meet with chat feature, and realtime tracking
 
-here's some screenshots in notification and meet activity, still on unpolished UI version
 
-Welcome Slider
+this app sadly, still have some bugs on its core. Direct Activity when both of users are trying to meet, sometimes each user has different id room of meet, so it still has this variable `private static boolean isItHasBugs = true;`
+```java
+if (isItHasBugs) {
+   return sad;
+}
+```
+
+##Welcome Slider
 
 <br>
 <br>
@@ -17,7 +23,7 @@ Welcome Slider
 <br>
 <br>
 
-Login & Splashscreen
+##Login & Splashscreen
 <br>
 <br>
 <img src="https://github.com/aladhims/MeetMe/blob/master/Screenshots/login.jpg" width="150" height="250" alt="firstSlide" margin-right="10px">
@@ -25,7 +31,7 @@ Login & Splashscreen
 <br>
 <br>
 
-List Friend, Add Friend & No Friend
+##List Friend, Add Friend & No Friend
 <br>
 <br>
 <img src="https://github.com/aladhims/MeetMe/blob/master/Screenshots/listfriend.jpg" width="150" height="250" alt="firstSlide" margin-right="10px">
@@ -36,7 +42,7 @@ List Friend, Add Friend & No Friend
 <br>
 <br>
 
-Search Result, No Result & Direct Activity
+##Search Result, No Result & Direct
 <br>
 <br>
 <img src="https://github.com/aladhims/MeetMe/blob/master/Screenshots/findresult.jpg" width="150" height="250" alt="firstSlide" margin-right="10px">
