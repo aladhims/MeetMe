@@ -6,7 +6,7 @@ this app sadly :cry: , still have some bugs on its core. Direct Activity when bo
 
 `private static boolean isItHasBugs = true;`
 
-so it still has that variable :disappointed_relieved:
+so it still a buggy app :disappointed_relieved:
 
 ```java
 if (isItHasBugs) {
